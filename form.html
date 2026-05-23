@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITA Srl — Questionario Abitazione</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* TORNA AL MENU */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1a1a2e;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      padding: 10px 16px;
+      text-decoration: none;
+      width: 100%;
+      transition: color 0.15s;
+    }
+    .btn-back:hover { color: white; }
+
+    /* HEADER */
+    .header {
+      background: #1a1a2e;
+      color: white;
+      padding: 24px 20px 20px;
+      text-align: center;
+    }
+    .header .logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #e8c44a;
+      margin-bottom: 4px;
+    }
+    .header .tagline {
+      font-size: 13px;
+      color: #aab4c8;
+      margin-bottom: 12px;
+    }
+    .header .intro {
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #dce3f0;
+      text-align: left;
+    }
+
+    /* PROGRESS */
+    .progress-bar {
+      background: #e0e6ef;
+      height: 4px;
+    }
+    .progress-fill {
+      height: 4px;
+      background: #e8c44a;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* CONTAINER */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    /* SEZIONE */
+    .sezione {
+      background: white;
+      border-radius: 14px;
+      padding: 22px 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .sezione-titolo {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #e8c44a;
+      margin-bottom: 4px;
+    }
+    .sezione-desc {
+      font-size: 13px;
+      color: #6b7a99;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    /* CAMPO */
+    .campo {
+      margin-bottom: 18px;
+    }
+    .campo:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+    label .obbligatorio { color: #e05555; margin-left: 2px; }
+    label .opzionale {
+      font-weight: 400;
+      color: #9aa3b8;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #dde3ef;
+      border-radius: 10px;
+      font-size: 15px;
+      color: #1a1a2e;
+      background: #fafbfd;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #1a1a2e;
+      background: white;
+    }
+    textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+
+    /* RADIO / CHECKBOX */
+    .opzioni {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .opzione {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border: 1.5px solid #dde3ef;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #fafbfd;
+    }
+    .opzione:hover { border-color: #1a1a2e; background: white; }
+    .opzione input[type="radio"],
+    .opzione input[type="checkbox"] {
+      width: auto;
+      accent-color: #1a1a2e;
+      cursor: pointer;
+    }
+    .opzione span {
+      font-size: 14px;
+      color: #1a1a2e;
+      line-height: 1.4;
+    }
+
+    /* NOTA */
+    .nota {
+      background: #fff8e6;
+      border-left: 3px solid #e8c44a;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #7a6520;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    /* FOTO */
+    .foto-area {
+      border: 2px dashed #c5cfe0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .foto-area:hover { border-color: #1a1a2e; background: white; }
+    .foto-area .icona { font-size: 32px; margin-bottom: 8px; }
+    .foto-area .testo { font-size: 14px; color: #6b7a99; line-height: 1.5; }
+    .foto-area input[type="file"] { display: none; }
+    .anteprima-foto {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .anteprima-foto img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1.5px solid #dde3ef;
+    }
+
+    /* PULSANTE */
+    .btn-invia {
+      width: 100%;
+      padding: 16px;
+      background: #1a1a2e;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .btn-invia:hover { background: #2a2a4e; }
+    .btn-invia:disabled { background: #9aa3b8; cursor: not-allowed; }
+
+    /* SCHERMATA GRAZIE */
+    .grazie {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .grazie .icona { font-size: 56px; margin-bottom: 16px; }
+    .grazie h2 { font-size: 22px; margin-bottom: 10px; color: #1a1a2e; }
+    .grazie p { font-size: 15px; color: #6b7a99; line-height: 1.6; }
+
+    /* ERRORE */
+    .errore { color: #e05555; font-size: 12px; margin-top: 4px; display: none; }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="btn-back">← Menu principale</a>
+
+<div class="header">
+  <div class="logo">I.T.A. SRL</div>
+  <div class="tagline">Isolamento Termico e Acustico · Roma</div>
+  <div class="intro">
+    Ciao! Per prepararci al meglio al suo caso, le chiediamo di rispondere a queste poche domande sulla sua abitazione.<br><br>
+    Ci vogliono circa <strong>3 minuti</strong>. Una volta ricevuto il questionario, le invieremo una <strong>stima orientativa</strong> prima ancora di incontrarci.
+  </div>
+</div>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<div class="container">
+
+  <form id="formLead" novalidate>
+
+    <!-- SEZIONE 1 — CONTATTO -->
+    <div class="sezione">
+      <div class="sezione-titolo">I suoi dati</div>
+      <div class="sezione-desc">Queste informazioni ci servono per ricontattarla con la stima.</div>
+
+      <div class="campo">
+        <label>Nome <span class="obbligatorio">*</span></label>
+        <input type="text" id="nome" placeholder="es. Mario" required>
+      </div>
+      <div class="campo">
+        <label>Cognome <span class="obbligatorio">*</span></label>
+        <input type="text" id="cognome" placeholder="es. Rossi" required>
+      </div>
+      <div class="campo">
+        <label>Numero di telefono <span class="obbligatorio">*</span></label>
+        <input type="tel" id="telefono" placeholder="es. 333 1234567" required>
+      </div>
+      <div class="campo">
+        <label>Come preferisce essere ricontattato? <span class="obbligatorio">*</span></label>
+        <div class="opzioni">
+          <label class="opzione">
+            <input type="radio" name="canale" value="WhatsApp" required>
+            <span>📱 WhatsApp</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="canale" value="Email">
+            <span>✉️ Email</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="canale" value="Telefono">
+            <span>📞 Telefonata</span>
+          </label>
+        </div>
+      </div>
+      <div class="campo" id="campoEmail" style="display:none;">
+        <label>Indirizzo email</label>
+        <input type="email" id="email" placeholder="es. mario.rossi@email.it">
+      </div>
+    </div>
+
+    <!-- SEZIONE 2 — IL PROBLEMA -->
+    <div class="sezione">
+      <div class="sezione-titolo">Il problema</div>
+      <div class="sezione-desc">Ci aiuta a capire cosa sta vivendo in casa.</div>
+
+      <div class="campo">
+        <label>Qual è il problema principale? <span class="obbligatorio">*</span></label>
+        <div class="opzioni">
+          <label class="opzione">
+            <input type="radio" name="problema" value="Freddo alle pareti" required>
+            <span>🥶 Freddo alle pareti</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="problema" value="Umidità e muffa">
+            <span>💧 Umidità e muffa</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="problema" value="Bollette alte">
+            <span>💸 Bollette troppo alte</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="problema" value="Rumore dai vicini">
+            <span>🔊 Rumore dai vicini</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="problema" value="Più problemi">
+            <span>⚠️ Più problemi insieme</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Da quanto tempo ha questo problema? <span class="obbligatorio">*</span></label>
+        <select id="durata_problema" required>
+          <option value="">— Seleziona —</option>
+          <option value="Meno di 1 anno">Meno di 1 anno</option>
+          <option value="1-3 anni">1-3 anni</option>
+          <option value="Più di 3 anni">Più di 3 anni</option>
+          <option value="Da sempre / casa vecchia">Da sempre / casa vecchia</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- SEZIONE 3 — L'IMMOBILE -->
+    <div class="sezione">
+      <div class="sezione-titolo">La sua abitazione</div>
+      <div class="sezione-desc">Alcune informazioni tecniche per valutare la fattibilità.</div>
+
+      <div class="campo">
+        <label>Zona / Quartiere <span class="obbligatorio">*</span></label>
+        <input type="text" id="zona" placeholder="es. Tuscolana, Prati, Ostia…" required>
+      </div>
+
+      <div class="campo">
+        <label>A che piano si trova? <span class="obbligatorio">*</span></label>
+        <select id="piano" required>
+          <option value="">— Seleziona —</option>
+          <option value="Piano terra">Piano terra</option>
+          <option value="1° piano">1° piano</option>
+          <option value="2° piano">2° piano</option>
+          <option value="3° piano">3° piano</option>
+          <option value="4° piano o superiore">4° piano o superiore</option>
+          <option value="Ultimo piano / attico">Ultimo piano / attico</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Anno di costruzione dell'edificio <span class="opzionale">(approssimativo)</span></label>
+        <select id="anno_edificio">
+          <option value="">— Non lo so —</option>
+          <option value="Prima del 1960">Prima del 1960</option>
+          <option value="Anni '60-'70">Anni '60-'70</option>
+          <option value="Anni '80-'90">Anni '80-'90</option>
+          <option value="Dopo il 2000">Dopo il 2000</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Quante stanze sono interessate dal problema? <span class="obbligatorio">*</span></label>
+        <div class="opzioni">
+          <label class="opzione">
+            <input type="radio" name="stanze" value="1 stanza" required>
+            <span>1 stanza</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="stanze" value="2-3 stanze">
+            <span>2-3 stanze</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="stanze" value="Tutta la casa">
+            <span>Tutta la casa</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Sa se le pareti esterne sono doppie? <span class="opzionale">(camera d'aria interna)</span></label>
+        <div class="opzioni">
+          <label class="opzione">
+            <input type="radio" name="pareti_doppie" value="Sì, pareti doppie">
+            <span>Sì, le pareti sono doppie</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="pareti_doppie" value="No, muri pieni">
+            <span>No, sono muri pieni</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="pareti_doppie" value="Non lo so">
+            <span>Non lo so</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEZIONE 4 — PROPRIETÀ -->
+    <div class="sezione">
+      <div class="sezione-titolo">La proprietà</div>
+      <div class="sezione-desc">Informazioni necessarie per procedere con il lavoro.</div>
+
+      <div class="campo">
+        <label>L'abitazione è di sua proprietà? <span class="obbligatorio">*</span></label>
+        <div class="opzioni">
+          <label class="opzione">
+            <input type="radio" name="proprieta" value="Sì, proprietario" required>
+            <span>Sì, sono il proprietario</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="proprieta" value="Familiare proprietario">
+            <span>È di un familiare (genitore, coniuge…)</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="proprieta" value="In affitto">
+            <span>È in affitto</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="proprieta" value="ATER / edilizia pubblica">
+            <span>ATER / edilizia pubblica</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Urgenza dei lavori <span class="obbligatorio">*</span></label>
+        <select id="urgenza" required>
+          <option value="">— Seleziona —</option>
+          <option value="Prima possibile">Prima possibile</option>
+          <option value="Entro 1-2 mesi">Entro 1-2 mesi</option>
+          <option value="Entro l'inverno">Entro l'inverno</option>
+          <option value="Con i miei tempi">Con i miei tempi, nessuna urgenza</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- SEZIONE 5 — FOTO -->
+    <div class="sezione">
+      <div class="sezione-titolo">Foto dell'abitazione</div>
+      <div class="sezione-desc">Ci aiutano moltissimo a darle una stima precisa. Può allegarne fino a 5.</div>
+
+      <div class="nota">
+        📸 Ideale: la parete più fredda o con umidità · un angolo con muffa · una foto esterna del palazzo
+      </div>
+
+      <div style="margin-top: 14px;">
+        <label class="foto-area" for="fotoInput">
+          <div class="icona">📷</div>
+          <div class="testo">Tocca qui per aggiungere foto<br><small>JPG, PNG — max 5 foto</small></div>
+          <input type="file" id="fotoInput" accept="image/*" multiple>
+        </label>
+        <div class="anteprima-foto" id="anteprimaFoto"></div>
+      </div>
+
+      <div class="campo" style="margin-top: 18px;">
+        <label>Vuole aggiungere qualcosa? <span class="opzionale">(facoltativo)</span></label>
+        <textarea id="note" placeholder="Qualsiasi informazione utile che non abbiamo chiesto…"></textarea>
+      </div>
+    </div>
+
+    <!-- SEZIONE FONTE — per uso interno marketing -->
+    <div class="sezione">
+      <div class="sezione-titolo">Come ci ha trovato?</div>
+      <div class="sezione-desc">Ci aiuta a capire come raggiungiamo le persone che ne hanno bisogno.</div>
+      <div class="campo">
+        <label>Ha sentito parlare di ITA tramite <span class="obbligatorio">*</span></label>
+        <div class="opzioni">
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Passaparola" required>
+            <span>🗣️ Passaparola / amico o parente</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Facebook / Instagram">
+            <span>📲 Facebook o Instagram</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Google">
+            <span>🔍 Google / ricerca online</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Sito web ITA">
+            <span>🌐 Sito web ITA</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Volantino / affissione">
+            <span>📄 Volantino o affissione</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Chiamata commerciale">
+            <span>📞 Siete stati voi a contattarmi</span>
+          </label>
+          <label class="opzione">
+            <input type="radio" name="fonte" value="Altro">
+            <span>💬 Altro</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-invia" id="btnInvia">
+      Invia il questionario →
+    </button>
+
+  </form>
+
+  <!-- SCHERMATA DI RINGRAZIAMENTO -->
+  <div class="grazie" id="grazie">
+    <div class="icona">✅</div>
+    <h2>Grazie! Abbiamo ricevuto tutto.</h2>
+    <p>Il nostro team analizzerà le sue risposte e la ricontatteremo al più presto con una stima orientativa.<br><br>
+    Se ha domande urgenti può chiamarci al <strong>06 XXXXXXXX</strong>.</p>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  //  CONFIGURAZIONE — inserire l'URL del web app dopo il deploy
+  // ============================================================
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxueMtwceichcj3gk7_OLvVRgFpwWNWt0hk565lrHRwR1B9CYi0D63wL2ptdaSdqA9Xpw/exec";
+
+  // ============================================================
+  //  PROGRESS BAR
+  // ============================================================
+  function aggiornaProgress() {
+    const campiObbligatori = document.querySelectorAll('[required]');
+    let compilati = 0;
+    campiObbligatori.forEach(campo => {
+      if (campo.type === 'radio') {
+        const gruppo = document.querySelectorAll(`[name="${campo.name}"]`);
+        const checked = Array.from(gruppo).some(r => r.checked);
+        if (checked) compilati++;
+      } else if (campo.value.trim() !== '') {
+        compilati++;
+      }
+    });
+
+    // Conta i gruppi radio una sola volta
+    const gruppiRadio = [...new Set(Array.from(document.querySelectorAll('[required][type="radio"]')).map(r => r.name))];
+    const totaleUnico = campiObbligatori.length - document.querySelectorAll('[required][type="radio"]').length + gruppiRadio.length;
+
+    const perc = Math.min(100, Math.round((compilati / totaleUnico) * 100));
+    document.getElementById('progressFill').style.width = perc + '%';
+  }
+
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('change', aggiornaProgress);
+    el.addEventListener('input', aggiornaProgress);
+  });
+
+  // ============================================================
+  //  MOSTRA CAMPO EMAIL se seleziona "Email"
+  // ============================================================
+  document.querySelectorAll('[name="canale"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.getElementById('campoEmail').style.display =
+        radio.value === 'Email' && radio.checked ? 'block' : 'none';
+    });
+  });
+
+  // ============================================================
+  //  ANTEPRIMA FOTO
+  // ============================================================
+  document.getElementById('fotoInput').addEventListener('change', function() {
+    const anteprima = document.getElementById('anteprimaFoto');
+    anteprima.innerHTML = '';
+    const files = Array.from(this.files).slice(0, 5);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        anteprima.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // ============================================================
+  //  RACCOLTA DATI DAL FORM
+  // ============================================================
+  function raccogliDati() {
+    const getRadio = name => {
+      const sel = document.querySelector(`[name="${name}"]:checked`);
+      return sel ? sel.value : '';
+    };
+
+    return {
+      action: "nuovoLead",
+      nome: document.getElementById('nome').value.trim(),
+      cognome: document.getElementById('cognome').value.trim(),
+      telefono: document.getElementById('telefono').value.trim(),
+      canale: getRadio('canale'),
+      email: document.getElementById('email').value.trim(),
+      zona: document.getElementById('zona').value.trim(),
+      problema: getRadio('problema'),
+      durata_problema: document.getElementById('durata_problema').value,
+      stanze: getRadio('stanze'),
+      piano: document.getElementById('piano').value,
+      anno_edificio: document.getElementById('anno_edificio').value,
+      pareti_doppie: getRadio('pareti_doppie'),
+      proprietario: getRadio('proprieta'),
+      flag_ater: getRadio('proprieta') === 'ATER / edilizia pubblica' ? 'Sì' : 'No',
+      flag_piano_terra: document.getElementById('piano').value === 'Piano terra' ? 'Sì' : 'No',
+      urgenza: document.getElementById('urgenza').value,
+      note_monica: document.getElementById('note').value.trim(),
+      fonte: getRadio('fonte'),
+      scoring: '🟡 Da valutare'
+    };
+  }
+
+  // ============================================================
+  //  VALIDAZIONE
+  // ============================================================
+  function valida() {
+    const campiTesto = ['nome', 'cognome', 'telefono', 'zona'];
+    let ok = true;
+
+    campiTesto.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) { el.style.borderColor = '#e05555'; ok = false; }
+      else el.style.borderColor = '#dde3ef';
+    });
+
+    const gruppiRadio = ['canale', 'problema', 'stanze', 'proprieta'];
+    gruppiRadio.forEach(name => {
+      if (!document.querySelector(`[name="${name}"]:checked`)) ok = false;
+    });
+
+    ['durata_problema', 'piano', 'urgenza'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value) { el.style.borderColor = '#e05555'; ok = false; }
+      else el.style.borderColor = '#dde3ef';
+    });
+
+    return ok;
+  }
+
+  // ============================================================
+  //  INVIO VIA IFRAME — bypassa CORS da file locale
+  // ============================================================
+  function inviaViaIframe(dati) {
+    return new Promise((resolve) => {
+      // Crea iframe nascosto
+      const iframe = document.createElement('iframe');
+      iframe.name = 'iframe_invio_' + Date.now();
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      // Crea form nascosto che punta all'iframe
+      const form = document.createElement('form');
+      form.method = 'GET';
+      form.action = APPS_SCRIPT_URL;
+      form.target = iframe.name;
+
+      // Aggiungi i dati come parametro payload
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'payload';
+      input.value = encodeURIComponent(JSON.stringify(dati));
+      form.appendChild(input);
+
+      const actionInput = document.createElement('input');
+      actionInput.type = 'hidden';
+      actionInput.name = 'action';
+      actionInput.value = 'nuovoLead';
+      form.appendChild(actionInput);
+
+      document.body.appendChild(form);
+
+      // Aspetta che l'iframe carichi (max 8 secondi)
+      let risolto = false;
+      iframe.onload = () => {
+        if (!risolto) { risolto = true; resolve(); }
+      };
+      setTimeout(() => {
+        if (!risolto) { risolto = true; resolve(); }
+      }, 8000);
+
+      form.submit();
+      document.body.removeChild(form);
+    });
+  }
+
+  // ============================================================
+  //  INVIO FORM
+  // ============================================================
+  document.getElementById('formLead').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!valida()) {
+      alert('Per favore compili tutti i campi obbligatori (contrassegnati con *).');
+      return;
+    }
+
+    const btn = document.getElementById('btnInvia');
+    btn.disabled = true;
+    btn.textContent = 'Invio in corso…';
+
+    const dati = raccogliDati();
+
+    try {
+      if (APPS_SCRIPT_URL === "INSERIRE_URL_APPS_SCRIPT_QUI") {
+        // Modalità demo — simula invio senza backend
+        console.log("Dati form:", dati);
+        await new Promise(r => setTimeout(r, 1000));
+      } else {
+        // Invio tramite iframe nascosto — evita blocco CORS da file locale
+        await inviaViaIframe(dati);
+      }
+
+      document.getElementById('formLead').style.display = 'none';
+      document.getElementById('grazie').style.display = 'block';
+      window.scrollTo(0, 0);
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Invia il questionario →';
+      alert('Si è verificato un errore. Riprovi tra qualche istante.');
+    }
+  });
+</script>
+</body>
+</html>

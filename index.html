@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITA Srl — Sistema Operativo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .logo { color: #e8c44a; font-size: 28px; font-weight: 800; letter-spacing: 3px; margin-bottom: 6px; text-align: center; }
+    .sub { color: rgba(255,255,255,0.4); font-size: 13px; letter-spacing: 1px; text-align: center; margin-bottom: 48px; }
+
+    .griglia {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .modulo {
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .modulo:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: #e8c44a;
+      transform: translateY(-2px);
+    }
+    .modulo.disabilitato {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .modulo-icona { font-size: 32px; }
+    .modulo-nome { font-size: 16px; font-weight: 700; color: white; }
+    .modulo-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+    .modulo-badge {
+      font-size: 11px;
+      background: rgba(232,196,74,0.15);
+      color: #e8c44a;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .modulo-badge.presto {
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.3);
+    }
+
+    .sezione-label {
+      width: 100%;
+      max-width: 860px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin: 32px 0 12px;
+    }
+    .sezione-label:first-of-type { margin-top: 0; }
+
+    .footer {
+      margin-top: 48px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.15);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">I.T.A. SRL</div>
+  <div class="sub">Sistema Operativo Aziendale</div>
+
+  <div class="sezione-label">Gestionale interno</div>
+  <div class="griglia">
+
+    <a class="modulo" href="dashboard.html">
+      <div class="modulo-icona">📋</div>
+      <div class="modulo-nome">Pipeline Lead</div>
+      <div class="modulo-desc">Gestione dei contatti e delle pratiche commerciali</div>
+      <div class="modulo-badge">Attivo</div>
+    </a>
+
+    <a class="modulo disabilitato" href="#">
+      <div class="modulo-icona">📅</div>
+      <div class="modulo-nome">Sopralluoghi</div>
+      <div class="modulo-desc">Calendario e gestione degli appuntamenti</div>
+      <div class="modulo-badge presto">In arrivo</div>
+    </a>
+
+    <a class="modulo disabilitato" href="#">
+      <div class="modulo-icona">📐</div>
+      <div class="modulo-nome">Preventivatore</div>
+      <div class="modulo-desc">Calcolo e generazione preventivi PDF</div>
+      <div class="modulo-badge presto">In arrivo</div>
+    </a>
+
+  </div>
+
+  <div class="sezione-label">Operativo squadre</div>
+  <div class="griglia">
+
+    <a class="modulo disabilitato" href="#">
+      <div class="modulo-icona">🔨</div>
+      <div class="modulo-nome">Scheda Lavoro</div>
+      <div class="modulo-desc">Istruzioni giornaliere per le squadre in cantiere</div>
+      <div class="modulo-badge presto">In arrivo</div>
+    </a>
+
+    <a class="modulo disabilitato" href="#">
+      <div class="modulo-icona">📝</div>
+      <div class="modulo-nome">Rapportino Cantiere</div>
+      <div class="modulo-desc">Resoconto giornaliero delle attività svolte</div>
+      <div class="modulo-badge presto">In arrivo</div>
+    </a>
+
+  </div>
+
+  <div class="sezione-label">Area clienti</div>
+  <div class="griglia">
+
+    <a class="modulo" href="form.html">
+      <div class="modulo-icona">📋</div>
+      <div class="modulo-nome">Questionario Abitazione</div>
+      <div class="modulo-desc">Profilazione del cliente dopo la chiamata</div>
+      <div class="modulo-badge">Attivo</div>
+    </a>
+
+    <a class="modulo disabilitato" href="#">
+      <div class="modulo-icona">⭐</div>
+      <div class="modulo-nome">Questionario Soddisfazione</div>
+      <div class="modulo-desc">Feedback del cliente dopo il lavoro</div>
+      <div class="modulo-badge presto">In arrivo</div>
+    </a>
+
+  </div>
+
+  <div class="sezione-label">Direzione</div>
+  <div class="griglia">
+
+    <a class="modulo disabilitato" href="#">
+      <div class="modulo-icona">📊</div>
+      <div class="modulo-nome">Report</div>
+      <div class="modulo-desc">Statistiche, conversioni e andamento commerciale</div>
+      <div class="modulo-badge presto">In arrivo</div>
+    </a>
+
+  </div>
+
+  <div class="footer">ITA Srl · Sistema v1.0 · 2026</div>
+
+</body>
+</html>
