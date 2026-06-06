@@ -1925,12 +1925,14 @@
   }
 
   function mostraModulo(nome) {
-    // per ora esiste solo pipeline
     document.getElementById('layer-home').style.display = 'none';
+    if (nome === 'pipeline') {
+      caricaLead();
+    }
   }
 
   function tornaHome() {
-    document.getElementById('layer-home').style.display = '';
+    document.getElementById('layer-home').style.display = 'block';
   }
 
   // ============================================================
@@ -2002,28 +2004,63 @@
   }
 
   function _avviaApp(match) {
-    document.getElementById('layer-pin').style.display  = 'none';
-    document.getElementById('layer-home').style.display = 'none';
-    document.querySelector('.sidebar').style.display    = '';
-    document.querySelector('.main').style.display       = '';
+    ruoloCorrente = match.ruolo;
 
-    // saluto
+    // Nasconde PIN
+    document.getElementById('layer-pin').style.display = 'none';
+
+    // Saluto
     const ora = new Date().getHours();
     const sal = ora < 12 ? 'Buongiorno' : ora < 18 ? 'Buon pomeriggio' : 'Buonasera';
     const elSaluto = document.getElementById('home-saluto');
     if (elSaluto) elSaluto.textContent = sal + ', ' + match.nome;
 
-    // badge ruolo topbar
+    // Badge ruolo
     const badge = document.getElementById('home-ruolo-badge');
     if (badge) badge.textContent = match.label;
 
-    // visibilità scheda tecnica (solo admin e commerciale)
-    ruoloCorrente = match.ruolo;
+    // Prepara sidebar+main ma nascosti sotto la home
+    document.querySelector('.sidebar').style.display = 'flex';
+    document.querySelector('.main').style.display    = 'flex';
 
-    caricaLead();
+    // Popola home grid e mostra home screen
+    _popolaHomeGrid(match.ruolo);
+    document.getElementById('layer-home').style.display = 'block';
   }
 
-  // ============================================================
+  function _popolaHomeGrid(ruolo) {
+    const card = (m) => m.attivo
+      ? '<div class="home-card" onclick="mostraModulo(\''+m.id+'\')"><div class="home-card-icon">'+m.icon+'</div><div class="home-card-label">'+m.label+'</div></div>'
+      : '<div class="home-card home-card-presto"><div class="home-card-icon">'+m.icon+'</div><div class="home-card-label">'+m.label+'</div><div class="home-card-desc">presto</div></div>';
+
+    const mostraComm = ['admin','commerciale'].includes(ruolo);
+    const mostraTecn = ['admin','tecnico'].includes(ruolo);
+    const mostraAmm  = ['admin','amm'].includes(ruolo);
+
+    const secC = document.getElementById('home-sezione-commerciale');
+    const secT = document.getElementById('home-sezione-operativo');
+    const secA = document.getElementById('home-sezione-amm');
+    if (secC) secC.style.display = mostraComm ? '' : 'none';
+    if (secT) secT.style.display = mostraTecn ? '' : 'none';
+    if (secA) secA.style.display = mostraAmm  ? '' : 'none';
+
+    if (mostraComm) document.getElementById('home-grid-commerciale').innerHTML = [
+      {id:'pipeline', icon:'📋', label:'Pipeline Lead',  attivo:true},
+      {id:'sopral',   icon:'📅', label:'Sopralluoghi',   attivo:false},
+      {id:'report',   icon:'📊', label:'Report',         attivo:false},
+    ].map(card).join('');
+
+    if (mostraTecn) document.getElementById('home-grid-operativo').innerHTML = [
+      {id:'cantieri', icon:'🔨', label:'Cantieri',       attivo:false},
+      {id:'prev',     icon:'📐', label:'Preventivatore', attivo:false},
+    ].map(card).join('');
+
+    if (mostraAmm) document.getElementById('home-grid-amm').innerHTML = [
+      {id:'fatture',  icon:'🧾', label:'Fatturazione',   attivo:false},
+      {id:'scad',     icon:'📆', label:'Scadenzario',    attivo:false},
+    ].map(card).join('');
+  }
+
   //  BOOTSTRAP
   // ============================================================
   document.addEventListener('DOMContentLoaded', () => {
