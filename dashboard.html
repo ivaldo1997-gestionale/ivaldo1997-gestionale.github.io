@@ -610,9 +610,8 @@
       width: 100%; padding: 13px; border-radius: var(--border-radius-md);
       background: #e8c44a; border: none; color: #1a1a2e; font-size: 15px; font-weight: 600;
       cursor: pointer; margin-top: 1.5rem; opacity: 0.4; transition: opacity 0.2s;
-      pointer-events: none;
-    }
-    .accedi-btn.pronto { opacity: 1; pointer-events: auto; }
+          }
+    .accedi-btn.pronto { opacity: 1; }
     .pin-errore { color: #ef4444; font-size: 13px; margin-top: 10px; min-height: 18px; text-align: center; }
     /* HOME */
     .home-topbar {
@@ -1967,7 +1966,7 @@
   function _aggiornaPin() {
     ['pd0','pd1','pd2','pd3'].forEach((id, i) => {
       const dot = document.getElementById(id);
-      if (dot) dot.classList.toggle('attivo', i < pinBuffer.length);
+      if (dot) dot.classList.toggle('filled', i < pinBuffer.length);
     });
     const btn = document.getElementById('accedi-btn');
     if (btn) btn.classList.toggle('pronto', pinBuffer.length === 4);
@@ -1975,6 +1974,10 @@
   }
 
   function pinAccedi() {
+    if (pinBuffer.length < 4) {
+      document.getElementById('pin-errore').textContent = 'Inserisci 4 cifre';
+      return;
+    }
     const match = PIN_RUOLI[pinBuffer];
     if (!match) {
       document.getElementById('pin-errore').textContent = 'PIN non riconosciuto';
