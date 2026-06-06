@@ -1877,24 +1877,16 @@
   //  INVIO VIA IFRAME (bypass CORS)
   // ============================================================
   function inviaAggiornamento(dati) {
-    return new Promise((resolve) => {
-      const form = document.createElement('form');
-      form.method = 'GET';
-      form.action = APPS_SCRIPT_URL;
-      form.target = 'iframe-nascosto';
-      form.style.display = 'none';
-      Object.entries(dati).forEach(([k, v]) => {
-        const inp = document.createElement('input');
-        inp.type  = 'hidden';
-        inp.name  = k;
-        inp.value = v !== undefined && v !== null ? String(v) : '';
-        form.appendChild(inp);
-      });
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-      setTimeout(resolve, 800);
+    // Usa fetch no-cors: il browser invia la richiesta, Apps Script esegue,
+    // la risposta è opaca (non leggibile) ma la scrittura sul Sheet avviene.
+    const params = new URLSearchParams();
+    Object.entries(dati).forEach(([k, v]) => {
+      params.append(k, v !== undefined && v !== null ? String(v) : '');
     });
+    const url = APPS_SCRIPT_URL + '?' + params.toString();
+    return fetch(url, { mode: 'no-cors' })
+      .then(() => {})
+      .catch(() => {});
   }
 
   // ============================================================
