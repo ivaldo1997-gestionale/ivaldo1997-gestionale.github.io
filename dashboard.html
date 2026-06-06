@@ -2073,6 +2073,18 @@
 
     // aggiornaOperaiBadge iniziale
     aggiornaOperaiBadge();
+
+    // Auto-avanzamento cursore nella scheda tecnica (tasto Invio)
+    document.getElementById('st-wrapper').addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+      e.preventDefault();
+      const all = Array.from(document.getElementById('st-wrapper').querySelectorAll('input[type="number"]'));
+      const idx = all.indexOf(e.target);
+      if (idx >= 0 && idx < all.length - 1) {
+        all[idx + 1].focus();
+        all[idx + 1].select();
+      }
+    });
   });
 
 </script>
