@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITA Srl — Gestionale</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a1a2e;
+      --navy-light: #24244a;
+      --gold: #e8c44a;
+      --gold-light: #f5e08a;
+      --bg: #f0f2f7;
+      --white: #ffffff;
+      --border: #dde3ef;
+      --text: #1a1a2e;
+      --muted: #6b7a99;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --sidebar-w: 220px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===================== SIDEBAR ===================== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      min-height: 100vh;
+      position: fixed;
+      left: 0; top: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo .nome {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold);
+    }
+    .sidebar-logo .sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
+
+    .sidebar-section {
+      padding: 16px 12px 8px;
+    }
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      padding: 0 8px;
+      margin-bottom: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      text-decoration: none;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-item .badge {
+      margin-left: auto;
+      background: var(--red);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .nav-item.active .badge { background: var(--navy); color: white; }
+
+    .nav-item.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .nav-item.disabled:hover { background: none; color: rgba(255,255,255,0.6); }
+    .nav-item .presto {
+      margin-left: auto;
+      font-size: 9px;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    .btn-home {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.45);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s;
+      margin: 8px 12px 0;
+    }
+    .btn-home:hover { background: rgba(255,255,255,0.07); color: white; }
+
+    /* PULSANTE COPIA LINK */
+    .btn-copia-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: rgba(232,196,74,0.1);
+      width: calc(100% - 24px);
+      margin: 4px 12px 0;
+      transition: all 0.15s;
+      text-align: left;
+    }
+    .btn-copia-link:hover { background: rgba(232,196,74,0.2); }
+    .btn-copia-link.copiato { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+    /* TEMA SWITCHER */
+    .tema-section {
+      padding: 10px 12px 0;
+    }
+    .tema-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 7px;
+      padding: 0 2px;
+    }
+    .tema-swatches {
+      display: flex;
+      gap: 8px;
+      padding: 0 2px;
+    }
+    .swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2.5px solid transparent;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .swatch:hover { transform: scale(1.12); }
+    .swatch.attivo { border-color: white; }
+    .swatch[data-tema="navy"]   { background: #f0f2f7; border: 2px solid rgba(255,255,255,0.3); }
+    .swatch[data-tema="ardesia"]{ background: #f2ede4; border: 2px solid rgba(255,255,255,0.3); }
+    .swatch[data-tema="foresta"]{ background: #151c2c; border: 2px solid rgba(255,255,255,0.3); }
+    .swatch.attivo { border-color: white !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.6); }
+
+    /* ===================== MAIN ===================== */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-title { font-size: 18px; font-weight: 700; color: var(--text); }
+    .topbar-subtitle { font-size: 13px; color: var(--muted); margin-top: 1px; }
+
+    .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-primary:hover { background: var(--navy-light); }
+    .btn-outline { background: white; color: var(--text); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--navy); }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { background: var(--gold-light); }
+
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ===================== PIPELINE ===================== */
+    .pipeline-wrap {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .colonna {
+      min-width: 260px;
+      flex: 1;
+      background: white;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 160px);
+    }
+
+    .colonna-header {
+      padding: 14px 16px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: white;
+      border-radius: 12px 12px 0 0;
+    }
+    .colonna-nome {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .colonna-count {
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .colonna-body {
+      padding: 12px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ===================== CARD LEAD ===================== */
+    .card {
+      background: #fafbfd;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .card:hover { border-color: var(--navy); background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+    .card-nome { font-size: 14px; font-weight: 700; color: var(--text); }
+    .card-data { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .card-scoring { font-size: 18px; }
+
+    .card-info { display: flex; flex-direction: column; gap: 4px; }
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .card-problema {
+      font-size: 12px;
+      color: var(--text);
+      background: var(--bg);
+      padding: 6px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    /* ===================== VUOTO ===================== */
+    .colonna-vuota {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      gap: 6px;
+    }
+    .colonna-vuota .ico { font-size: 24px; opacity: 0.4; }
+
+    /* ===================== LOADING ===================== */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: var(--muted);
+      font-size: 14px;
+      gap: 10px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===================== MODALE ===================== */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }
+    .overlay.aperta { display: flex; }
+
+    .modale {
+      width: 420px;
+      max-width: 100%;
+      background: white;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modale-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
+    }
+    .modale-titolo { font-size: 16px; font-weight: 700; }
+    .btn-chiudi {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .modale-body { padding: 20px 24px; flex: 1; }
+
+    .campo-modale { margin-bottom: 18px; }
+    .campo-modale label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .campo-modale .valore {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .sezione-modale {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin: 20px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modale-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: sticky;
+      bottom: 0;
+      background: white;
+    }
+
+    select.stato-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: white;
+      cursor: pointer;
+    }
+    select.stato-select:focus { outline: none; border-color: var(--navy); }
+
+    .badge-scoring {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge-verde { background: #dcfce7; color: #166534; }
+    .badge-giallo { background: #fef9c3; color: #854d0e; }
+    .badge-rosso { background: #fee2e2; color: #991b1b; }
+    .badge-default { background: var(--bg); color: var(--muted); }
+
+    /* ===================== FILTRI ===================== */
+    .filtri {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filtro-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .filtro-btn:hover { border-color: var(--navy); color: var(--text); }
+    .filtro-btn.attivo { background: var(--navy); color: white; border-color: var(--navy); }
+
+    .cerca {
+      padding: 6px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      outline: none;
+      color: var(--text);
+      margin-left: auto;
+    }
+    .cerca:focus { border-color: var(--navy); }
+
+    /* ===================== SCORING BUTTONS ===================== */
+    .footer-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .scoring-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .scoring-btn {
+      flex: 1;
+      padding: 9px 6px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .scoring-btn:hover { border-color: var(--navy); color: var(--text); }
+    .scoring-btn.verde.attivo  { background: #dcfce7; border-color: #22c55e; color: #166534; }
+    .scoring-btn.giallo.attivo { background: #fef9c3; border-color: #f59e0b; color: #854d0e; }
+    .scoring-btn.rosso.attivo  { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
+    /* NOTE MONICA */
+    .note-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text);
+      background: white;
+      resize: vertical;
+      min-height: 70px;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+    .note-textarea:focus { outline: none; border-color: var(--navy); }
+    .note-textarea::placeholder { color: var(--muted); }
+
+    /* PULSANTE WHATSAPP */
+    .btn-whatsapp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px;
+      border-radius: 8px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 6px;
+      transition: all 0.15s;
+    }
+    .btn-whatsapp:hover { background: #bbf7d0; }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .content { padding: 16px; }
+    }
+
+    /* ===================== SCHERMATA PIN ===================== */
+    .layer-pin {
+      position: fixed; inset: 0; z-index: 600;
+      background: #1a1a2e;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .layer-home {
+      position: fixed; inset: 0; z-index: 500;
+      background: var(--bg); overflow-y: auto; display: none;
+    }
+    .pin-dot {
+      width: 13px; height: 13px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3); background: transparent; transition: background 0.15s;
+    }
+    .pin-dot.filled { background: #e8c44a; border-color: #e8c44a; }
+    .pin-key {
+      width: 64px; height: 52px; border-radius: var(--border-radius-md);
+      background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.12);
+      color: white; font-size: 18px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: background 0.1s;
+    }
+    .pin-key:hover { background: rgba(255,255,255,0.15); }
+    .pin-key:active { background: rgba(255,255,255,0.25); transform: scale(0.96); }
+    .accedi-btn {
+      width: 100%; padding: 13px; border-radius: var(--border-radius-md);
+      background: #e8c44a; border: none; color: #1a1a2e; font-size: 15px; font-weight: 600;
+      cursor: pointer; margin-top: 1.5rem; opacity: 0.4; transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .accedi-btn.pronto { opacity: 1; pointer-events: auto; }
+    .pin-errore { color: #ef4444; font-size: 13px; margin-top: 10px; min-height: 18px; text-align: center; }
+    /* HOME */
+    .home-topbar {
+      background: #1a1a2e; padding: 18px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .home-content { padding: 28px; max-width: 820px; margin: 0 auto; }
+    .home-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px; margin-top: 24px;
+    }
+    .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .home-card {
+      background: var(--white); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 20px 14px 16px; text-align: center; cursor: pointer;
+      transition: all 0.15s; position: relative;
+    }
+    .home-card:hover:not(.home-card-presto) {
+      border-color: var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-1px);
+    }
+    .home-card-presto { opacity: 0.4; cursor: default; }
+    .home-card-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+    .home-card-label { font-size: 14px; font-weight: 700; color: var(--text); }
+    .home-card-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .presto-tag {
+      position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 700;
+      background: rgba(0,0,0,0.06); color: var(--muted);
+      padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px;
+    }
+    .btn-logout {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.15);
+      border-radius: var(--border-radius-md); color: rgba(255,255,255,0.6);
+      font-size: 13px; padding: 7px 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.14); color: white; }
+    .ruolo-badge {
+      font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+      background: rgba(232,196,74,0.15); color: #e8c44a;
+    }
+    /* ===================== SCHEDA TECNICA — 5 PANNELLI ===================== */
+    .btn-scheda {
+      width: 100%; padding: 10px; margin-top: 10px;
+      background: #f0f4ff; border: 1.5px solid #c0d0ff;
+      border-radius: 8px; color: #2244aa; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-scheda:hover { background: #dce8ff; }
+    .st-wrapper {
+      display: none; margin-top: 12px;
+      background: #f8faff; border: 1.5px solid #c0d0ff;
+      border-radius: 10px; overflow: hidden;
+    }
+    .st-wrapper.aperto { display: block; }
+    .st-progressbar {
+      display: flex; background: #e8efff;
+      border-bottom: 1px solid #c0d0ff;
+    }
+    .st-step {
+      flex: 1; padding: 7px 2px; text-align: center;
+      font-size: 9px; font-weight: 700; color: #8899cc;
+      border-right: 1px solid #c0d0ff; transition: all 0.2s; cursor: default;
+    }
+    .st-step:last-child { border-right: none; }
+    .st-step.attivo { background: #2244aa; color: white; }
+    .st-step.completato { background: #d4e0ff; color: #2244aa; }
+    .st-pannello { display: none; padding: 14px 16px; }
+    .st-pannello.visibile { display: block; }
+    .st-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: #2244aa; margin-bottom: 12px;
+    }
+    .st-field { margin-bottom: 10px; }
+    .st-field label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); margin-bottom: 4px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .st-field input, .st-field select, .st-field textarea {
+      width: 100%; padding: 7px 10px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 13px; color: var(--text);
+      background: var(--white); outline: none; box-sizing: border-box;
+    }
+    .st-field input:focus, .st-field select:focus, .st-field textarea:focus { border-color: #2244aa; }
+    .st-badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 20px; margin-bottom: 10px;
+    }
+    .st-badge.blu { background: #dce8ff; color: #2244aa; }
+    .st-badge.verde { background: #d4f5d4; color: #1a6b1a; }
+    .st-nota {
+      background: #fff8e6; border: 1px solid #e8c44a;
+      border-radius: 6px; padding: 8px 10px;
+      font-size: 11px; color: #7a5800; margin-bottom: 10px; display: none;
+    }
+    .st-nota.visibile { display: block; }
+    .st-stanza {
+      background: white; border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+    }
+    .st-stanza-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #2244aa; margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .btn-add-parete {
+      font-size: 11px; padding: 3px 8px; border-radius: 5px;
+      cursor: pointer; border: 1px solid; font-weight: 600;
+      background: #f0f4ff; border-color: #c0d0ff; color: #2244aa;
+    }
+    .st-parete-block { margin-bottom: 10px; }
+    .st-parete-row {
+      display: flex; gap: 6px; align-items: center; margin-bottom: 4px;
+    }
+    .st-parete-row input {
+      flex: 1; padding: 6px 8px; border: 1.5px solid var(--border);
+      border-radius: 5px; font-size: 12px; color: var(--text);
+      background: var(--white); outline: none; min-width: 0; box-sizing: border-box;
+    }
+    .st-parete-row input:focus { border-color: #2244aa; }
+    .btn-add-fin-par {
+      font-size: 11px; padding: 3px 8px; border-radius: 5px;
+      cursor: pointer; border: 1px solid; font-weight: 600; white-space: nowrap;
+      background: #f0fff0; border-color: #90d090; color: #1a6b1a; flex-shrink: 0;
+    }
+    .st-finestre-par { padding-left: 14px; }
+    .st-finestra-row {
+      display: flex; gap: 6px; align-items: center; margin-bottom: 5px;
+    }
+    .st-finestra-row input {
+      flex: 1; padding: 6px 8px; border: 1.5px solid #90d090;
+      border-radius: 5px; font-size: 12px; color: var(--text);
+      background: #f8fff8; outline: none; min-width: 0; box-sizing: border-box;
+    }
+    .st-finestra-row input:focus { border-color: #40a040; }
+    .btn-rm { background: none; border: none; color: #cc4444; cursor: pointer; font-size: 14px; padding: 2px 4px; flex-shrink: 0; }
+    .st-row-label {
+      font-size: 10px; font-weight: 700; color: #2244aa;
+      min-width: 32px; flex-shrink: 0; letter-spacing: 0.3px;
+    }
+    .st-row-label.fin { color: #1a6b1a; }
+    .st-mq-preview { font-size: 11px; color: #2244aa; margin-top: 4px; text-align: right; font-weight: 700; }
+    .st-nav { display: flex; gap: 8px; padding: 0 16px 14px; }
+    .btn-st-back {
+      flex: 0 0 auto; padding: 9px 16px; background: white;
+      border: 1.5px solid var(--border); border-radius: 7px;
+      color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-st-next {
+      flex: 1; padding: 9px; background: #2244aa; border: none;
+      border-radius: 7px; color: white; font-size: 13px;
+      font-weight: 600; cursor: pointer;
+    }
+    .btn-st-next:hover { background: #1a3280; }
+    .st-output {
+      background: white; border: 1.5px solid #a0c0ff;
+      border-radius: 8px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .st-range { font-size: 22px; font-weight: 700; color: #1a3a8a; margin-bottom: 8px; }
+    .st-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .st-tag {
+      font-size: 10px; font-weight: 600; padding: 2px 7px;
+      border-radius: 10px; background: #f0f4ff; color: #2244aa; border: 1px solid #c0d0ff;
+    }
+    .st-actions { display: flex; gap: 8px; padding: 0 16px 16px; }
+    .btn-salva-stima {
+      flex: 1; padding: 9px; background: #2244aa; border: none;
+      border-radius: 7px; color: white; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-salva-stima:hover { background: #1a3280; }
+    .btn-apri-v5 {
+      flex: 1; padding: 9px; background: white; border: 1.5px solid #2244aa;
+      border-radius: 7px; color: #2244aa; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-apri-v5:hover { background: #f0f4ff; }
+  </style>
+</head>
+<body>
+
+<!-- ===================== SCHERMATA PIN ===================== -->
+<div id="layer-pin" class="layer-pin">
+  <div style="text-align:center;width:220px;">
+    <div style="font-size:22px;font-weight:800;letter-spacing:3px;color:#e8c44a;margin-bottom:3px;">I.T.A. SRL</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:2.5rem;">Gestionale operativo</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:14px;">Inserisci il PIN</div>
+    <div id="pin-dots" style="display:flex;gap:14px;justify-content:center;margin-bottom:1.75rem;">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,64px);gap:10px;justify-content:center;">
+      <button class="pin-key" onclick="pinDigit('1')">1</button>
+      <button class="pin-key" onclick="pinDigit('2')">2</button>
+      <button class="pin-key" onclick="pinDigit('3')">3</button>
+      <button class="pin-key" onclick="pinDigit('4')">4</button>
+      <button class="pin-key" onclick="pinDigit('5')">5</button>
+      <button class="pin-key" onclick="pinDigit('6')">6</button>
+      <button class="pin-key" onclick="pinDigit('7')">7</button>
+      <button class="pin-key" onclick="pinDigit('8')">8</button>
+      <button class="pin-key" onclick="pinDigit('9')">9</button>
+      <button class="pin-key" onclick="pinCancella()" style="font-size:13px;color:rgba(255,255,255,0.5);">C</button>
+      <button class="pin-key" onclick="pinDigit('0')">0</button>
+      <button class="pin-key" onclick="pinBack()" style="font-size:13px;">←</button>
+    </div>
+    <button class="accedi-btn" id="accedi-btn" onclick="pinAccedi()">Accedi</button>
+    <div class="pin-errore" id="pin-errore"></div>
+  </div>
+</div>
+
+<!-- ===================== SCHERMATA HOME ===================== -->
+<div id="layer-home" class="layer-home">
+  <div class="home-topbar">
+    <div>
+      <div style="font-size:17px;font-weight:800;letter-spacing:2px;color:#e8c44a;">I.T.A. SRL</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;">Gestionale operativo</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="ruolo-badge" id="home-ruolo-badge">Admin</span>
+      <button class="btn-logout" onclick="pinLogout()">&#8592; Esci</button>
+    </div>
+  </div>
+  <div class="home-content">
+    <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;" id="home-saluto">Buongiorno</div>
+    <div style="font-size:14px;color:var(--muted);">Seleziona il modulo</div>
+    <div id="home-sezione-commerciale">
+      <div class="home-section-label">Commerciale</div>
+      <div class="home-grid" id="home-grid-commerciale"></div>
+    </div>
+    <div id="home-sezione-operativo">
+      <div class="home-section-label">Operativo</div>
+      <div class="home-grid" id="home-grid-operativo"></div>
+    </div>
+    <div id="home-sezione-amm">
+      <div class="home-section-label">Amministrazione</div>
+      <div class="home-grid" id="home-grid-amm"></div>
+    </div>
+    <div id="home-sezione-report">
+      <div class="home-section-label">Report &amp; Direzione</div>
+      <div class="home-grid" id="home-grid-report"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== SIDEBAR ===================== -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="nome">I.T.A. SRL</div>
+    <div class="sub">Gestionale operativo</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Commerciale</div>
+    <div class="nav-item active" onclick="mostraModulo('pipeline')">
+      <span class="icon">📋</span> Pipeline Lead
+      <span class="badge" id="badge-nuovi">0</span>
+    </div>
+    <div class="nav-item disabled" title="Prossimamente">
+      <span class="icon">📅</span> Sopralluoghi
+      <span class="presto">presto</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Operativo</div>
+    <div class="nav-item disabled" title="Prossimamente">
+      <span class="icon">🔨</span> Cantieri
+      <span class="presto">presto</span>
+    </div>
+    <div class="nav-item disabled" title="Prossimamente">
+      <span class="icon">📐</span> Preventivatore
+      <span class="presto">presto</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Amministrativo</div>
+    <div class="nav-item disabled" title="Prossimamente">
+      <span class="icon">🧾</span> Fatturazione
+      <span class="presto">presto</span>
+    </div>
+    <div class="nav-item disabled" title="Prossimamente">
+      <span class="icon">📊</span> Report
+      <span class="presto">presto</span>
+    </div>
+  </div>
+
+  <button class="btn-copia-link" id="btnCopiaLink" onclick="copiaLinkForm()">
+    <span>📋</span> Copia link questionario
+  </button>
+
+  <div class="btn-home" onclick="tornaHome()" style="cursor:pointer;">
+    <span>🏠</span> Home gestionale
+  </div>
+
+  <div class="tema-section">
+    <div class="tema-label">Tema</div>
+    <div class="tema-swatches">
+      <div class="swatch attivo" data-tema="navy"    title="Navy"    onclick="cambiaTema('navy',    this)"></div>
+      <div class="swatch"        data-tema="ardesia"  title="Ardesia"  onclick="cambiaTema('ardesia',  this)"></div>
+      <div class="swatch"        data-tema="foresta"  title="Foresta"  onclick="cambiaTema('foresta',  this)"></div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    v1.0 · Maggio 2026
+  </div>
+</nav>
+
+<!-- ===================== MAIN ===================== -->
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Pipeline Lead</div>
+      <div class="topbar-subtitle" id="topbar-sub">Caricamento in corso…</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline" onclick="caricaLead()">↻ Aggiorna</button>
+      <button class="btn btn-gold" onclick="apriForm()">+ Nuovo lead</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- FILTRI -->
+    <div class="filtri">
+      <button class="filtro-btn attivo" onclick="filtra('tutti', this)">Tutti</button>
+      <button class="filtro-btn" onclick="filtra('verde', this)">🟢 Verdi</button>
+      <button class="filtro-btn" onclick="filtra('giallo', this)">🟡 Gialli</button>
+      <button class="filtro-btn" onclick="filtra('rosso', this)">🔴 Rossi</button>
+      <input class="cerca" type="text" placeholder="🔍 Cerca per nome o zona…" oninput="cercaLead(this.value)">
+    </div>
+
+    <!-- PIPELINE -->
+    <div id="pipeline" class="pipeline-wrap">
+      <div class="loading"><div class="spinner"></div> Caricamento lead…</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== MODALE DETTAGLIO ===================== -->
+<div class="overlay" id="overlay" onclick="chiudiModaleSeFuori(event)">
+  <div class="modale" id="modale">
+    <div class="modale-header">
+      <div class="modale-titolo" id="modale-titolo">Lead</div>
+      <button class="btn-chiudi" onclick="chiudiModale()">✕</button>
+    </div>
+    <div class="modale-body" id="modale-body"></div>
+    <div class="modale-footer">
+      <div class="footer-label">Scoring lead</div>
+      <div class="scoring-buttons">
+        <button class="scoring-btn verde"  onclick="impostaScoring('🟢 Verde', this)">🟢 Verde</button>
+        <button class="scoring-btn giallo" onclick="impostaScoring('🟡 Da valutare', this)">🟡 Giallo</button>
+        <button class="scoring-btn rosso"  onclick="impostaScoring('🔴 Rosso', this)">🔴 Rosso</button>
+      </div>
+
+      <div class="footer-label">Note Monica</div>
+      <textarea class="note-textarea" id="note-monica" placeholder="Aggiungi note dopo la chiamata…"></textarea>
+
+      <a id="btn-whatsapp" class="btn-whatsapp" target="_blank">📱 Apri WhatsApp</a>
+
+      <!-- SCHEDA TECNICA 5 PANNELLI — visibile solo a commerciale e admin -->
+      <button class="btn-scheda" id="btn-scheda-tecnica" onclick="toggleSchedaTecnica()" style="display:none">
+        📐 Scheda tecnica — seconda chiamata
+      </button>
+      <div class="st-wrapper" id="st-wrapper">
+
+        <!-- Barra progresso -->
+        <div class="st-progressbar">
+          <div class="st-step attivo" id="st-step-1">1 Base</div>
+          <div class="st-step" id="st-step-2">2 Costruttivo</div>
+          <div class="st-step" id="st-step-3">3 Geometria</div>
+          <div class="st-step" id="st-step-4">4 Operative</div>
+          <div class="st-step" id="st-step-5">5 Stima</div>
+        </div>
+
+        <!-- PANNELLO 1 — DATI BASE -->
+        <div class="st-pannello visibile" id="st-p1">
+          <div class="st-title">📋 Dati base — conferma con il cliente</div>
+          <div class="st-field">
+            <label>Anno edificio</label>
+            <input type="number" id="st-anno" placeholder="es. 1975" min="1900" max="2024">
+          </div>
+          <div class="st-field">
+            <label>Piano dell'intervento</label>
+            <input type="number" id="st-piano" placeholder="0 = piano terra" min="0" max="30">
+          </div>
+          <div class="st-field">
+            <label>Piani totali edificio</label>
+            <input type="number" id="st-piani-tot" placeholder="es. 4" min="1" max="30" oninput="aggiornaNoteCondominiale()">
+          </div>
+          <div class="st-field">
+            <label>Stanze coinvolte nell'intervento</label>
+            <input type="number" id="st-stanze-n" placeholder="es. 3" min="1" max="20">
+          </div>
+          <div class="st-field">
+            <label>Tipo immobile</label>
+            <select id="st-tipo-imm">
+              <option value="appartamento">Appartamento</option>
+              <option value="villa">Villa / Casa indipendente</option>
+              <option value="ufficio">Ufficio</option>
+              <option value="locale">Locale commerciale</option>
+            </select>
+          </div>
+          <div class="st-field">
+            <label>Pareti doppie confermate</label>
+            <select id="st-pareti-doppie">
+              <option value="si">Sì — confermate</option>
+              <option value="no">No / Da verificare al sopralluogo</option>
+            </select>
+          </div>
+          <div class="st-nota" id="st-nota-cond">
+            🏢 Edificio con più piani — segnala opportunità condominiale durante la chiamata.
+          </div>
+        </div>
+
+        <!-- PANNELLO 2 — CARATTERISTICHE COSTRUTTIVE -->
+        <div class="st-pannello" id="st-p2">
+          <div class="st-title">🧱 Caratteristiche costruttive</div>
+          <div class="st-field">
+            <label>Tipo parete</label>
+            <select id="st-tipo-parete" onchange="aggiornaCavita()">
+              <option value="cortina">Cortina (Mattoncino semipieno)</option>
+              <option value="intonaco">Intonaco (muratura con intonaco)</option>
+            </select>
+          </div>
+          <div class="st-field">
+            <label>Altezza soffitto (m)</label>
+            <input type="number" id="st-altezza" placeholder="es. 2.70" min="2" max="5" step="0.05" oninput="aggiornaMqLive()">
+          </div>
+          <div class="st-field">
+            <label>Spalla finestra (cm) — opzionale</label>
+            <input type="number" id="st-spalla" placeholder="lascia vuoto → default 15 cm" min="0" max="60" step="1" oninput="aggiornaCavita()">
+          </div>
+          <div class="st-badge blu" id="st-cavita-preview" style="display:none"></div>
+          <div class="st-nota" id="st-nota-cavita-bassa">
+            ⚠️ Cavità inferiore a 10 cm — maggiorazione foratura +10% applicata automaticamente.
+          </div>
+        </div>
+
+        <!-- PANNELLO 3 — GEOMETRIA PARETI -->
+        <div class="st-pannello" id="st-p3">
+          <div class="st-title">📐 Geometria per stanza</div>
+          <div class="st-field">
+            <label>Tipo chiusura finestre</label>
+            <select id="st-chiusura" onchange="aggiornaChiusuraBadge()">
+              <option value="avvolgibili">Avvolgibili — solo larghezza (altezza = soffitto)</option>
+              <option value="persiane">Persiane — larghezza e altezza</option>
+            </select>
+          </div>
+          <div id="st-stanze-container"></div>
+          <button onclick="aggiungiStanza()" style="width:100%;padding:8px;margin-top:2px;background:#f8faff;border:1.5px dashed #c0d0ff;border-radius:7px;color:#2244aa;font-size:12px;font-weight:600;cursor:pointer;">+ Aggiungi stanza</button>
+          <div id="st-mq-totale" style="margin-top:10px;font-size:13px;color:#2244aa;font-weight:700;text-align:right;"></div>
+        </div>
+
+        <!-- PANNELLO 4 — CONDIZIONI OPERATIVE -->
+        <div class="st-pannello" id="st-p4">
+          <div class="st-title">🏗️ Condizioni operative</div>
+          <div class="st-field">
+            <label>Edificio abitato durante i lavori</label>
+            <select id="st-abitato" onchange="aggiornaOperaiBadge()">
+              <option value="no">Ristrutturazione in corso</option>
+              <option value="si">Casa abitata</option>
+            </select>
+          </div>
+          <div class="st-badge blu" id="st-operai-badge">⚙️ 2 operai · 320 €/gg manodopera</div>
+          <div class="st-field">
+            <label>Accesso furgone</label>
+            <select id="st-accesso">
+              <option value="diretto">Parcheggio Diretto</option>
+              <option value="scarico">Scarico Necessario (+15%)</option>
+            </select>
+          </div>
+          <div class="st-field">
+            <label>Note operative</label>
+            <textarea id="st-note-op" rows="2" placeholder="es. citofono piano 3, ZTL giovedì, cancello stretto…"></textarea>
+          </div>
+        </div>
+
+        <!-- PANNELLO 5 — STIMA -->
+        <div class="st-pannello" id="st-p5">
+          <div class="st-title">💶 Stima — output automatico</div>
+          <div class="st-output" id="st-output">
+            <span style="color:var(--muted);font-size:12px">In attesa dei dati…</span>
+          </div>
+          <div id="st-nota-cond-p5" style="display:none;background:#e8fff0;border:1px solid #70c070;border-radius:6px;padding:8px 10px;font-size:11px;color:#1a5a1a;margin-bottom:10px;">
+            🏢 Edificio con più piani — proponi il pacchetto condominiale.
+          </div>
+        </div>
+
+        <!-- Navigazione pannelli -->
+        <div class="st-nav" id="st-nav">
+          <button class="btn-st-back" id="st-btn-back" onclick="stPannelloPrev()" style="display:none">← Indietro</button>
+          <button class="btn-st-next" id="st-btn-next" onclick="stPannelloNext()">Avanti →</button>
+        </div>
+
+        <!-- Azioni pannello 5 -->
+        <div class="st-actions" id="st-actions" style="display:none">
+          <button class="btn-salva-stima" onclick="salvaStima()">💾 Salva stima</button>
+          <a class="btn-apri-v5" id="btn-apri-v5" href="#" target="_blank">📄 Preventivo completo</a>
+        </div>
+
+      </div>
+
+      <div class="footer-label">Fase pipeline</div>
+      <select class="stato-select" id="stato-select">
+        <option value="Nuovo">📥 Nuovo</option>
+        <option value="Contattato">📞 Contattato</option>
+        <option value="Approfondimento">📋 Approfondimento</option>
+        <option value="Sopralluogo">🔍 Sopralluogo fissato</option>
+        <option value="Preventivo">📄 Preventivo inviato</option>
+        <option value="Accettato">✅ Accettato</option>
+        <option value="Chiuso">❌ Chiuso</option>
+      </select>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="salvaAggiornamento()">Salva modifiche</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  //  CONFIGURAZIONE
+  // ============================================================
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxueMtwceichcj3gk7_OLvVRgFpwWNWt0hk565lrHRwR1B9CYi0D63wL2ptdaSdqA9Xpw/exec";
+  const FORM_URL = "https://ivaldo1997-gestionale.github.io/form.html";
+
+  // Fasi della pipeline
+  const FASI = [
+    { id: "Nuovo",            label: "Nuovi Lead",         icon: "📥" },
+    { id: "Contattato",       label: "Contattati",          icon: "📞" },
+    { id: "Approfondimento",  label: "Approfondimento",     icon: "📋" },
+    { id: "Sopralluogo",      label: "Sopralluogo",          icon: "🔍" },
+    { id: "Preventivo",       label: "Preventivo inviato",  icon: "📄" },
+    { id: "Accettato",        label: "Accettati",           icon: "✅" },
+  ];
+
+  // ============================================================
+  //  STATO
+  // ============================================================
+  let tuttiLead = [];
+  let leadFiltrati = [];
+  let leadCorrente = null;
+  let filtroAttivo = 'tutti';
+  let ricercaAttiva = '';
+  let scoringCorrente = '🟡 Da valutare';
+  let ruoloCorrente   = '';
+
+  // ============================================================
+  //  CARICAMENTO LEAD
+  // ============================================================
+  async function caricaLead() {
+    document.getElementById('pipeline').innerHTML =
+      '<div class="loading"><div class="spinner"></div> Caricamento lead…</div>';
+
+    try {
+      const url = APPS_SCRIPT_URL + '?action=getAllLead&t=' + Date.now();
+      const script = document.createElement('script');
+      const callbackName = 'cb_' + Date.now();
+
+      const dati = await new Promise((resolve, reject) => {
+        window[callbackName] = (d) => { delete window[callbackName]; resolve(d); };
+
+        // Usa iframe GET — stesso metodo del form
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.name = callbackName;
+        document.body.appendChild(iframe);
+
+        fetch(url, { mode: 'no-cors' }).catch(() => {});
+
+        // Fallback: carica via script tag (JSONP-style non supportato, usiamo fetch diretto)
+        fetch(url)
+          .then(r => r.json())
+          .then(d => { delete window[callbackName]; document.body.removeChild(iframe); resolve(d); })
+          .catch(() => {
+            // Riprova senza CORS
+            document.body.removeChild(iframe);
+            resolve({ success: true, lead: [] });
+          });
+      });
+
+      tuttiLead = (dati.lead || dati.Lead || dati.principio || []).map(normalizzaLead);
+      applicaFiltri();
+      aggiornaContatori();
+
+    } catch (err) {
+      document.getElementById('pipeline').innerHTML =
+        '<div class="loading">⚠️ Errore di connessione. <button class="btn btn-outline" style="margin-left:10px" onclick="caricaLead()">Riprova</button></div>';
+    }
+  }
+
+  function normalizzaLead(r) {
+    return {
+      id: r['ID'] || r['id'] || '',
+      nome: r['Nome'] || '',
+      cognome: r['Cognome'] || '',
+      telefono: String(r['Telefono'] || ''),
+      canale: r['Canale Preferito'] || '',
+      email: r['Email'] || '',
+      zona: r['Zona'] || '',
+      problema: r['Problema Principale'] || '',
+      durata: r['Durata Problema'] || '',
+      proprietario: r['Proprietario'] || '',
+      piano: String(r['Piano'] || ''),
+      anno: String(r['Anno Edificio'] || ''),
+      stanze: String(r['Stanze Coinvolte'] || ''),
+      pareti: r['Pareti Doppie'] || '',
+      ater: r['Flag ATER'] || 'No',
+      pianoterra: r['Flag Piano Terra'] || 'No',
+      budget: r['Budget Orientativo'] || '',
+      urgenza: r['Urgenza'] || '',
+      scoring: r['Scoring'] || '🟡 Da valutare',
+      note: r['Note Monica'] || '',
+      fonte: r['Fonte Lead'] || '',
+      stato: r['Stato'] || 'Nuovo',
+      data: r['Data Chiamata'] || '',
+      superficie_mq: r['Superficie mq'] || '',
+      spessore_cm: r['Spessore cm'] || '',
+      stima_min: r['Stima Min'] || '',
+      stima_max: r['Stima Max'] || '',
+    };
+  }
+
+  // ============================================================
+  //  FILTRI E RICERCA
+  // ============================================================
+  function filtra(tipo, btn) {
+    filtroAttivo = tipo;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('attivo'));
+    btn.classList.add('attivo');
+    applicaFiltri();
+  }
+
+  function cercaLead(testo) {
+    ricercaAttiva = testo.toLowerCase();
+    applicaFiltri();
+  }
+
+  function applicaFiltri() {
+    leadFiltrati = tuttiLead.filter(l => {
+      const passaFiltro =
+        filtroAttivo === 'tutti' ||
+        (filtroAttivo === 'verde' && l.scoring.includes('🟢')) ||
+        (filtroAttivo === 'giallo' && (l.scoring.includes('🟡') || l.scoring.includes('Da valutare'))) ||
+        (filtroAttivo === 'rosso' && l.scoring.includes('🔴'));
+
+      const passaRicerca = !ricercaAttiva ||
+        (l.nome + ' ' + l.cognome + ' ' + l.zona).toLowerCase().includes(ricercaAttiva);
+
+      return passaFiltro && passaRicerca;
+    });
+
+    renderPipeline();
+  }
+
+  // ============================================================
+  //  RENDER PIPELINE
+  // ============================================================
+  function renderPipeline() {
+    const container = document.getElementById('pipeline');
+    container.innerHTML = '';
+
+    FASI.forEach(fase => {
+      const leadFase = leadFiltrati.filter(l =>
+        (l.stato || 'Nuovo') === fase.id ||
+        (fase.id === 'Nuovo' && !l.stato)
+      );
+
+      const col = document.createElement('div');
+      col.className = 'colonna';
+      col.innerHTML = `
+        <div class="colonna-header">
+          <div class="colonna-nome">${fase.icon} ${fase.label}</div>
+          <div class="colonna-count">${leadFase.length}</div>
+        </div>
+        <div class="colonna-body" id="col-${fase.id}">
+          ${leadFase.length === 0
+            ? `<div class="colonna-vuota"><div class="ico">—</div><div>Nessun lead</div></div>`
+            : leadFase.map(cardHTML).join('')
+          }
+        </div>
+      `;
+      container.appendChild(col);
+    });
+  }
+
+  function cardHTML(lead) {
+    const scoring = badgeScoring(lead.scoring);
+    const nomeCompleto = (lead.nome + ' ' + lead.cognome).trim() || 'Senza nome';
+    const data = lead.data ? lead.data.split(' ')[0] : '';
+
+    return `
+      <div class="card" onclick="apriModale('${lead.id}')">
+        <div class="card-header">
+          <div>
+            <div class="card-nome">${nomeCompleto}</div>
+            <div class="card-data">${data}</div>
+          </div>
+          <div class="card-scoring">${scoringEmoji(lead.scoring)}</div>
+        </div>
+        <div class="card-info">
+          ${lead.zona ? `<span class="card-tag">📍 ${lead.zona}</span>` : ''}
+          ${lead.urgenza ? `<span class="card-tag">⏰ ${lead.urgenza}</span>` : ''}
+          ${lead.ater === 'Sì' ? `<span class="card-tag" style="color:#e05555">⚠️ ATER</span>` : ''}
+          ${lead.pianoterra === 'Sì' ? `<span class="card-tag" style="color:#f59e0b">🏠 Piano terra</span>` : ''}
+        </div>
+        ${lead.problema ? `<div class="card-problema">${lead.problema}</div>` : ''}
+      </div>
+    `;
+  }
+
+  function scoringEmoji(scoring) {
+    if (scoring.includes('🟢')) return '🟢';
+    if (scoring.includes('🔴')) return '🔴';
+    return '🟡';
+  }
+
+  function badgeScoring(scoring) {
+    if (scoring.includes('🟢')) return '<span class="badge-scoring badge-verde">🟢 Verde</span>';
+    if (scoring.includes('🔴')) return '<span class="badge-scoring badge-rosso">🔴 Rosso</span>';
+    return '<span class="badge-scoring badge-giallo">🟡 Giallo</span>';
+  }
+
+  // ============================================================
+  //  CONTATORI
+  // ============================================================
+  function aggiornaContatori() {
+    const nuovi = tuttiLead.filter(l => !l.stato || l.stato === 'Nuovo').length;
+    const badge = document.getElementById('badge-nuovi');
+    badge.textContent = nuovi;
+    badge.style.display = nuovi > 0 ? 'block' : 'none';
+
+    const data = new Date().toLocaleDateString('it-IT');
+    document.getElementById('topbar-sub').textContent =
+      `${tuttiLead.length} lead totali · aggiornato il ${data}`;
+  }
+
+  // ============================================================
+  //  MODALE DETTAGLIO
+  // ============================================================
+  function apriModale(id) {
+    try {
+    leadCorrente = tuttiLead.find(l => l.id === id);
+    if (!leadCorrente) {
+      console.warn('Lead non trovato per id:', id, '| tuttiLead:', tuttiLead.length);
+      return;
+    }
+
+    document.getElementById('modale-titolo').textContent =
+      (leadCorrente.nome + ' ' + leadCorrente.cognome).trim() || 'Lead';
+
+    document.getElementById('modale-body').innerHTML = `
+      <div>${badgeScoring(leadCorrente.scoring)}</div>
+
+      <div class="sezione-modale">Contatto</div>
+      ${riga('Nome', leadCorrente.nome + ' ' + leadCorrente.cognome)}
+      ${riga('Telefono', leadCorrente.telefono)}
+      ${riga('Canale preferito', leadCorrente.canale)}
+      ${leadCorrente.email ? riga('Email', leadCorrente.email) : ''}
+      ${riga('Fonte lead', leadCorrente.fonte)}
+
+      <div class="sezione-modale">Il problema</div>
+      ${riga('Problema', leadCorrente.problema)}
+      ${riga('Da quanto tempo', leadCorrente.durata)}
+
+      <div class="sezione-modale">L'immobile</div>
+      ${riga('Zona', leadCorrente.zona)}
+      ${riga('Piano', leadCorrente.piano)}
+      ${riga('Anno edificio', leadCorrente.anno)}
+      ${riga('Stanze coinvolte', leadCorrente.stanze)}
+      ${riga('Pareti doppie', leadCorrente.pareti)}
+      ${leadCorrente.ater === 'Sì' ? `<div style="background:#fee2e2;padding:8px 10px;border-radius:8px;font-size:13px;color:#991b1b;margin-bottom:10px;">⚠️ Immobile ATER — verificare autorizzazione</div>` : ''}
+      ${leadCorrente.pianoterra === 'Sì' ? `<div style="background:#fef9c3;padding:8px 10px;border-radius:8px;font-size:13px;color:#854d0e;margin-bottom:10px;">🏠 Piano terra — foto pareti obbligatorie</div>` : ''}
+
+      <div class="sezione-modale">Budget e urgenza</div>
+      ${riga('Budget orientativo', leadCorrente.budget)}
+      ${riga('Urgenza', leadCorrente.urgenza)}
+      ${riga('Proprietà', leadCorrente.proprietario)}
+
+      ${leadCorrente.note ? `
+        <div class="sezione-modale">Note Monica</div>
+        ${riga('Note', leadCorrente.note)}
+      ` : ''}
+
+      <div class="sezione-modale">Stato attuale</div>
+    `;
+
+    const sel = document.getElementById('stato-select');
+    sel.value = leadCorrente.stato || 'Nuovo';
+
+    // Scoring buttons
+    scoringCorrente = leadCorrente.scoring || '🟡 Da valutare';
+    document.querySelectorAll('.scoring-btn').forEach(btn => {
+      btn.classList.remove('attivo');
+      if (
+        (btn.classList.contains('verde')  && scoringCorrente.includes('🟢')) ||
+        (btn.classList.contains('giallo') && (scoringCorrente.includes('🟡') || scoringCorrente.includes('Da valutare'))) ||
+        (btn.classList.contains('rosso')  && scoringCorrente.includes('🔴'))
+      ) btn.classList.add('attivo');
+    });
+
+    // Note Monica
+    document.getElementById('note-monica').value = leadCorrente.note || '';
+
+    // Pulsante WhatsApp
+    const tel = (leadCorrente.telefono || '').replace(/\D/g, '');
+    const btnWa = document.getElementById('btn-whatsapp');
+    if (tel) {
+      btnWa.href = 'https://wa.me/39' + tel;
+      btnWa.style.display = 'flex';
+    } else {
+      btnWa.style.display = 'none';
+    }
+
+    document.getElementById('overlay').classList.add('aperta');
+
+    // Scheda tecnica — visibile solo a commerciale e admin
+    const btnScheda = document.getElementById('btn-scheda-tecnica');
+    if (ruoloCorrente === 'commerciale' || ruoloCorrente === 'admin') {
+      btnScheda.style.display = 'block';
+    } else {
+      btnScheda.style.display = 'none';
+    }
+    // Chiudi scheda tecnica e resetta al pannello 1
+    const stWrap = document.getElementById('st-wrapper');
+    if (stWrap) stWrap.classList.remove('aperto');
+    stPannelloCorrente = 1;
+    // Pre-compila pannello 1 con i dati già nel lead
+    const pianoLead = parseInt(leadCorrente.piano) || 0;
+    document.getElementById('st-piano').value = pianoLead;
+    if (leadCorrente.anno_edificio) document.getElementById('st-anno').value = leadCorrente.anno_edificio;
+    if (leadCorrente.stanze_coinvolte) document.getElementById('st-stanze-n').value = leadCorrente.stanze_coinvolte;
+    aggiornaNoteCondominiale();
+    window._stStima = null;
+
+    } catch(err) {
+      console.error('Errore in apriModale:', err);
+      alert('Errore apertura scheda:\n' + err.message + '\n\nSegnala questo messaggio a Ivaldo.');
+    }
+  }
+
+  function impostaScoring(valore, btn) {
+    scoringCorrente = valore;
+    document.querySelectorAll('.scoring-btn').forEach(b => b.classList.remove('attivo'));
+    btn.classList.add('attivo');
+  }
+
+  function riga(label, valore) {
+    if (!valore || valore.toString().trim() === '') return '';
+    return `
+      <div class="campo-modale">
+        <label>${label}</label>
+        <div class="valore">${valore}</div>
+      </div>
+    `;
+  }
+
+  function chiudiModale() {
+    document.getElementById('overlay').classList.remove('aperta');
+    // Reset scheda tecnica
+    const stWrap = document.getElementById('st-wrapper');
+    if (stWrap) stWrap.classList.remove('aperto');
+    stPannelloCorrente = 1;
+    stanzaCounter = 0;
+    const stCont = document.getElementById('st-stanze-container');
+    if (stCont) stCont.innerHTML = '';
+    window._stStima = null;
+    leadCorrente = null;
+  }
+
+  function chiudiModaleSeFuori(e) {
+    if (e.target === document.getElementById('overlay')) chiudiModale();
+  }
+
+  function aggiornaScoringUI() {} // mantenuto per compatibilità
+
+  // ============================================================
+  //  SCHEDA TECNICA — 5 PANNELLI
+  // ============================================================
+  let stPannelloCorrente = 1;
+  const ST_TOT = 5;
+  let stanzaCounter = 0;
+
+  function toggleSchedaTecnica() {
+    const w = document.getElementById('st-wrapper');
+    if (w.classList.contains('aperto')) {
+      w.classList.remove('aperto');
+    } else {
+      w.classList.add('aperto');
+      if (!document.getElementById('st-stanze-container').children.length) {
+        aggiungiStanza();
+      }
+      stVaiPannello(1);
+    }
+  }
+
+  function stVaiPannello(n) {
+    stPannelloCorrente = n;
+    for (let i = 1; i <= ST_TOT; i++) {
+      document.getElementById('st-p' + i).classList.toggle('visibile', i === n);
+      const step = document.getElementById('st-step-' + i);
+      step.classList.remove('attivo', 'completato');
+      if (i === n) step.classList.add('attivo');
+      else if (i < n) step.classList.add('completato');
+    }
+    const back = document.getElementById('st-btn-back');
+    const next = document.getElementById('st-btn-next');
+    const actions = document.getElementById('st-actions');
+    back.style.display = n > 1 ? 'block' : 'none';
+    if (n === ST_TOT) {
+      next.style.display = 'none';
+      actions.style.display = 'flex';
+      calcolaStima();
+    } else {
+      next.style.display = 'block';
+      next.textContent = n === ST_TOT - 1 ? 'Calcola stima →' : 'Avanti →';
+      actions.style.display = 'none';
+    }
+  }
+
+  function stPannelloNext() {
+    if (stPannelloCorrente < ST_TOT) stVaiPannello(stPannelloCorrente + 1);
+  }
+
+  function stPannelloPrev() {
+    if (stPannelloCorrente > 1) stVaiPannello(stPannelloCorrente - 1);
+  }
+
+  // ── Pannello 1 ─────────────────────────────────────────────
+  function aggiornaNoteCondominiale() {
+    const tot = parseInt(document.getElementById('st-piani-tot').value) || 0;
+    document.getElementById('st-nota-cond').classList.toggle('visibile', tot > 2);
+  }
+
+  // ── Pannello 2 ─────────────────────────────────────────────
+  function aggiornaCavita() {
+    const spalla = parseFloat(document.getElementById('st-spalla').value);
+    const tipo = document.getElementById('st-tipo-parete').value;
+    const preview = document.getElementById('st-cavita-preview');
+    const notaBassa = document.getElementById('st-nota-cavita-bassa');
+    if (!spalla || isNaN(spalla)) {
+      preview.style.display = 'none';
+      notaBassa.classList.remove('visibile');
+      aggiornaMqLive();
+      return;
+    }
+    const sottrazione = tipo === 'cortina' ? 17 : 14;
+    const cavitaReale = spalla - sottrazione;
+    const cavita = Math.max(13, cavitaReale);
+    preview.style.display = 'inline-block';
+    preview.textContent = '📏 Cavità stimata: ' + cavita.toFixed(0) + ' cm';
+    notaBassa.classList.toggle('visibile', cavitaReale < 10);
+    aggiornaMqLive();
+  }
+
+  function getCavita() {
+    const spalla = parseFloat(document.getElementById('st-spalla').value);
+    if (!spalla || isNaN(spalla)) return 15;
+    const tipo = document.getElementById('st-tipo-parete').value;
+    const sottrazione = tipo === 'cortina' ? 17 : 14;
+    return Math.max(13, spalla - sottrazione);
+  }
+
+  function getCavitaReale() {
+    const spalla = parseFloat(document.getElementById('st-spalla').value);
+    if (!spalla || isNaN(spalla)) return 15;
+    const tipo = document.getElementById('st-tipo-parete').value;
+    const sottrazione = tipo === 'cortina' ? 17 : 14;
+    return spalla - sottrazione;
+  }
+
+  // ── Pannello 3 ─────────────────────────────────────────────
+  const _parCnt = {};  // contatore pareti per stanza
+
+  function aggiungiStanza() {
+    stanzaCounter++;
+    const sid = stanzaCounter;
+    _parCnt[sid] = 0;
+    const container = document.getElementById('st-stanze-container');
+    const div = document.createElement('div');
+    div.className = 'st-stanza';
+    div.id = 'st-stanza-' + sid;
+    div.innerHTML = `
+      <div class="st-stanza-title">
+        <span>Stanza ${sid}</span>
+        <div style="display:flex;gap:5px;">
+          <button class="btn-add-parete" onclick="aggiungiParete(${sid})">+ Parete</button>
+          ${sid > 1 ? `<button class="btn-rm" onclick="rimuoviStanza(${sid})">✕</button>` : ''}
+        </div>
+      </div>
+      <div id="st-pareti-${sid}"></div>
+      <div class="st-mq-preview" id="st-mq-stanza-${sid}"></div>
+    `;
+    container.appendChild(div);
+    aggiungiParete(sid);
+    aggiornaMqLive();
+  }
+
+  function aggiungiParete(sid) {
+    _parCnt[sid] = (_parCnt[sid] || 0) + 1;
+    const pid = _parCnt[sid];
+    const container = document.getElementById('st-pareti-' + sid);
+    const block = document.createElement('div');
+    block.className = 'st-parete-block';
+    block.id = 'st-par-' + sid + '-' + pid;
+    block.innerHTML = `
+      <div class="st-parete-row">
+        <span class="st-row-label">P${pid}</span>
+        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.1" oninput="aggiornaMqLive()">
+        <button class="btn-add-fin-par" onclick="aggiungiFinestra(${sid},${pid})">+ Finestra</button>
+        <button class="btn-rm" onclick="document.getElementById('st-par-${sid}-${pid}').remove();aggiornaMqLive()">✕</button>
+      </div>
+      <div class="st-finestre-par" id="st-fin-${sid}-${pid}"></div>
+    `;
+    container.appendChild(block);
+    aggiornaMqLive();
+  }
+
+  function aggiungiFinestra(sid, pid) {
+    const container = document.getElementById('st-fin-' + sid + '-' + pid);
+    const chiusura = document.getElementById('st-chiusura').value;
+    const n = container.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'st-finestra-row';
+    if (chiusura === 'avvolgibili') {
+      row.innerHTML = `
+        <span class="st-row-label fin">F${pid}.${n}</span>
+        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()">
+        <button class="btn-rm" onclick="this.parentElement.remove();aggiornaMqLive()">✕</button>
+      `;
+    } else {
+      row.innerHTML = `
+        <span class="st-row-label fin">F${pid}.${n}</span>
+        <input type="number" placeholder="L (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()">
+        <input type="number" placeholder="H (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()">
+        <button class="btn-rm" onclick="this.parentElement.remove();aggiornaMqLive()">✕</button>
+      `;
+    }
+    container.appendChild(row);
+    aggiornaMqLive();
+  }
+
+  function rimuoviStanza(id) {
+    document.getElementById('st-stanza-' + id).remove();
+    aggiornaMqLive();
+  }
+
+  function aggiornaChiusuraBadge() { aggiornaMqLive(); }
+
+  function getMqStanza(sid) {
+    const altezza = parseFloat(document.getElementById('st-altezza').value) || 2.7;
+    const chiusura = document.getElementById('st-chiusura').value;
+    let totMq = 0;
+    document.querySelectorAll('#st-pareti-' + sid + ' .st-parete-block').forEach(block => {
+      const parInput = block.querySelector('.st-parete-row input');
+      const lParete = parseFloat(parInput ? parInput.value : 0) || 0;
+      let mqFin = 0;
+      block.querySelectorAll('.st-finestre-par .st-finestra-row').forEach(row => {
+        const ins = row.querySelectorAll('input');
+        if (chiusura === 'avvolgibili') {
+          mqFin += (parseFloat(ins[0].value) || 0) * altezza;
+        } else {
+          const l = parseFloat(ins[0] ? ins[0].value : 0) || 0;
+          const h = parseFloat(ins[1] ? ins[1].value : 0) || 0;
+          mqFin += l * h;
+        }
+      });
+      totMq += Math.max(0, lParete * altezza - mqFin);
+    });
+    return totMq;
+  }
+
+  function aggiornaMqLive() {
+    let totale = 0;
+    document.getElementById('st-stanze-container').querySelectorAll('.st-stanza').forEach(st => {
+      const id = st.id.replace('st-stanza-', '');
+      const mq = getMqStanza(id);
+      totale += mq;
+      const prev = document.getElementById('st-mq-stanza-' + id);
+      if (prev) prev.textContent = mq > 0 ? mq.toFixed(1) + ' mq netti' : '';
+    });
+    const totEl = document.getElementById('st-mq-totale');
+    if (totEl) totEl.textContent = totale > 0 ? 'Totale: ' + totale.toFixed(1) + ' mq netti' : '';
+  }
+
+  function aggiornaOperaiBadge() {
+    const val = document.getElementById('st-abitato').value;
+    const abitato = (val === 'si');
+    const nOp = abitato ? 3 : 2;
+    const costoGg = nOp * 160;
+    const badge = document.getElementById('st-operai-badge');
+    if (badge) {
+      badge.textContent = '⚙️ ' + nOp + ' operai · ' + costoGg + ' €/gg manodopera';
+      badge.style.background = abitato ? '#fff8e1' : '#dbeafe';
+      badge.style.color     = abitato ? '#78350f' : '#1e3a8a';
+    }
+  }
+
+  function calcolaStima() {
+    // ---- dati pannelli ----
+    const piano     = parseInt(document.getElementById('st-piano').value)   || 0;
+    const pianiTot  = parseInt(document.getElementById('st-piani-tot').value) || 0;
+    const tipoP     = document.getElementById('st-tipo-parete').value;
+    const abitatoV  = document.getElementById('st-abitato').value;
+    const abitato   = (abitatoV === 'si');
+    const accesso   = document.getElementById('st-accesso').value;
+    const cavita    = getCavita();
+    const cavitaR   = getCavitaReale();
+
+    // ---- mq totali ----
+    let mqTot = 0;
+    document.getElementById('st-stanze-container').querySelectorAll('.st-stanza').forEach(st => {
+      mqTot += getMqStanza(st.id.replace('st-stanza-', ''));
+    });
+    if (mqTot <= 0) { alert('Inserisci almeno una parete con larghezza.'); return; }
+
+    // ---- calcolo ----
+    const mc      = mqTot * (cavita / 100);
+    const sacchi  = Math.ceil(mc * 45 / 15);
+    const nOp     = abitato ? 3 : 2;
+    const squadra = nOp / 2;
+    const costoMat       = mc * 56.25;
+    const moTot          = nOp * 160;
+    const opFissi        = 240;
+    const baseRicarico   = costoMat + moTot + opFissi;
+    const baseLorda      = baseRicarico * 1.60;
+    let   percMagg       = 0;
+    if (abitato)            percMagg += 0.08;
+    if (accesso === 'scarico') percMagg += 0.15;
+    if (cavitaR  < 10)     percMagg += 0.10;
+    const baseMagg  = baseLorda * (1 + percMagg);
+    const suppPiano = piano * 15;
+    let imp = baseMagg + suppPiano;
+    const margineMin = (mc < 3 ? 240 : mc < 6 ? 360 : mc < 9 ? 480 : 600) * squadra;
+    const soglia = baseRicarico + suppPiano + margineMin;
+    if (imp < soglia) imp = soglia;
+    imp = Math.ceil(imp / 50) * 50;
+
+    // range ±5%
+    const stiMin = Math.ceil((imp * 0.95) / 50) * 50;
+    const stiMax = Math.ceil((imp * 1.05) / 50) * 50;
+
+    // ---- tag ----
+    const statoTag   = abitato ? 'Casa abitata' : 'Ristrutturazione in corso';
+    const accessoTag = accesso === 'scarico' ? 'Scarico necessario (+15%)' : 'Parcheggio diretto';
+    const tipoTag    = tipoP === 'cortina' ? 'Cortina (Mattoncino semipieno)' : 'Intonaco';
+    const tags = [
+      mqTot.toFixed(1) + ' mq netti',
+      mc.toFixed(2) + ' mc',
+      sacchi + ' sacchi',
+      Math.round(imp / mqTot) + ' €/mq',
+      'Cavità ' + cavita + ' cm',
+      nOp + ' operai',
+      tipoTag,
+      statoTag,
+      accessoTag,
+    ];
+    if (piano > 0)     tags.push('Piano ' + piano + ' (+' + suppPiano + ' €)');
+    if (cavitaR < 10)  tags.push('Foratura difficile (+10%)');
+
+    const tagsHtml = tags.map(t => '<span class="st-tag">' + t + '</span>').join('');
+    const out = document.getElementById('st-output');
+    out.innerHTML =
+      '<div class="st-stima-range">' +
+        '<span class="st-range-min">€ ' + stiMin.toLocaleString('it-IT') + '</span>' +
+        '<span class="st-range-sep"> — </span>' +
+        '<span class="st-range-max">€ ' + stiMax.toLocaleString('it-IT') + '</span>' +
+      '</div>' +
+      '<div class="st-tags">' + tagsHtml + '</div>' +
+      '<div class="st-disclaimer">Stima indicativa ±5% · Insufflaggio cellulosa</div>';
+    out.dataset.min = stiMin;
+    out.dataset.max = stiMax;
+    out.dataset.mq  = mqTot.toFixed(1);
+    out.dataset.cm  = cavita;
+
+    // nota condominiale p5
+    const notaP5 = document.getElementById('st-nota-cond-p5');
+    if (notaP5) {
+      if (pianiTot > 2) {
+        notaP5.style.display = 'block';
+        notaP5.textContent = '🏢 Edificio con ' + pianiTot + ' piani — proponi il pacchetto condominiale.';
+      } else {
+        notaP5.style.display = 'none';
+      }
+    }
+
+    // aggiorna link preventivo completo
+    const linkV5 = document.getElementById('btn-apri-v5');
+    if (linkV5) {
+      const p = new URLSearchParams({
+        mq: mqTot.toFixed(1), cavita: cavita,
+        piano: piano, abitato: abitato ? 'si' : 'no',
+        accesso: accesso, tipo: tipoP
+      });
+      linkV5.href = 'https://ivaldo1997-gestionale.github.io/preventivatore.html?' + p.toString();
+    }
+
+    window._stimaCalcolata = { stiMin, stiMax, mq: parseFloat(mqTot.toFixed(1)), cm: cavita };
+  }
+
+  function salvaStima() {
+    const out = document.getElementById('st-output');
+    if (!out.dataset.min) { alert('Calcola prima la stima (vai al pannello 5).'); return; }
+    if (!leadCorrente) { alert('Nessun lead selezionato.'); return; }
+    const dati = {
+      action: 'aggiornaLead',
+      id: leadCorrente.id,
+      superficie_mq: out.dataset.mq,
+      spessore_cm:   out.dataset.cm,
+      stima_min:     out.dataset.min,
+      stima_max:     out.dataset.max
+    };
+    inviaAggiornamento(dati).then(() => {
+      const btn = document.querySelector('.btn-salva-stima');
+      if (btn) {
+        btn.textContent = '✅ Salvata';
+        setTimeout(() => { btn.textContent = '💾 Salva stima'; }, 2000);
+      }
+    });
+  }
+
+  // ============================================================
+  //  SALVA AGGIORNAMENTO LEAD (da modale)
+  // ============================================================
+  function salvaAggiornamento() {
+    if (!leadCorrente) return;
+    const stato = document.getElementById('stato-select') ? document.getElementById('stato-select').value : '';
+    const note  = document.getElementById('note-monica')  ? document.getElementById('note-monica').value  : '';
+    const dati = {
+      action: 'aggiornaLead',
+      id: leadCorrente.id,
+      stato: stato,
+      scoring: scoringCorrente,
+      note_monica: note,
+      Data_Aggiornamento: new Date().toLocaleDateString('it-IT')
+    };
+    inviaAggiornamento(dati).then(() => {
+      const btn = document.querySelector('[onclick="salvaAggiornamento()"]');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✅ Salvato';
+        setTimeout(() => {
+          btn.textContent = orig;
+          chiudiModale();
+        }, 1400);
+      } else {
+        chiudiModale();
+      }
+      // aggiorna localmente
+      leadCorrente.stato   = stato;
+      leadCorrente.scoring = scoringCorrente;
+      leadCorrente.note_monica = note;
+      renderPipeline();
+    });
+  }
+
+  // ============================================================
+  //  INVIO VIA IFRAME (bypass CORS)
+  // ============================================================
+  function inviaAggiornamento(dati) {
+    return new Promise((resolve) => {
+      const form = document.createElement('form');
+      form.method = 'GET';
+      form.action = APPS_SCRIPT_URL;
+      form.target = 'iframe-nascosto';
+      form.style.display = 'none';
+      Object.entries(dati).forEach(([k, v]) => {
+        const inp = document.createElement('input');
+        inp.type  = 'hidden';
+        inp.name  = k;
+        inp.value = v !== undefined && v !== null ? String(v) : '';
+        form.appendChild(inp);
+      });
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+      setTimeout(resolve, 800);
+    });
+  }
+
+  // ============================================================
+  //  UTILITÀ UI
+  // ============================================================
+  function copiaLinkForm() {
+    navigator.clipboard.writeText(FORM_URL).then(() => {
+      const btn = document.getElementById('btnCopiaLink');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✅</span> Link copiato!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      }
+    }).catch(() => {
+      prompt('Copia il link:', FORM_URL);
+    });
+  }
+
+  function apriForm() {
+    window.open(FORM_URL, '_blank');
+  }
+
+  function cambiaTema(tema, el) {
+    document.body.classList.remove('tema-ardesia', 'tema-foresta');
+    if (tema !== 'navy') document.body.classList.add('tema-' + tema);
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('attivo'));
+    if (el) el.classList.add('attivo');
+  }
+
+  function mostraModulo(nome) {
+    // per ora esiste solo pipeline
+    document.getElementById('layer-home').style.display = 'none';
+  }
+
+  function tornaHome() {
+    document.getElementById('layer-home').style.display = '';
+  }
+
+  // ============================================================
+  //  SISTEMA PIN
+  // ============================================================
+  const PIN_RUOLI = {
+    '0000': { nome: 'Admin',        ruolo: 'admin',       label: 'Admin 📊' },
+    '1111': { nome: 'Monica',       ruolo: 'commerciale', label: 'Commerciale 📋' },
+    '2222': { nome: 'Squadre',      ruolo: 'squadre',     label: 'Squadre 🔨' },
+    '3333': { nome: 'Amm.',         ruolo: 'amm',         label: 'Amministrazione 🧾' },
+    '4444': { nome: 'Uff. Tecnico', ruolo: 'tecnico',     label: 'Ufficio Tecnico 🔧' },
+    '5555': { nome: 'Marketing',    ruolo: 'marketing',   label: 'Marketing 📣' },
+  };
+
+  let pinBuffer = '';
+
+  function pinDigit(d) {
+    if (pinBuffer.length >= 4) return;
+    pinBuffer += d;
+    _aggiornaPin();
+  }
+
+  function pinBack() {
+    pinBuffer = pinBuffer.slice(0, -1);
+    _aggiornaPin();
+  }
+
+  function pinCancella() {
+    pinBuffer = '';
+    _aggiornaPin();
+  }
+
+  function _aggiornaPin() {
+    ['pd0','pd1','pd2','pd3'].forEach((id, i) => {
+      const dot = document.getElementById(id);
+      if (dot) dot.classList.toggle('attivo', i < pinBuffer.length);
+    });
+    const btn = document.getElementById('accedi-btn');
+    if (btn) btn.classList.toggle('pronto', pinBuffer.length === 4);
+    document.getElementById('pin-errore').textContent = '';
+  }
+
+  function pinAccedi() {
+    const match = PIN_RUOLI[pinBuffer];
+    if (!match) {
+      document.getElementById('pin-errore').textContent = 'PIN non riconosciuto';
+      pinCancella();
+      return;
+    }
+    sessionStorage.setItem('ita_pin',   pinBuffer);
+    sessionStorage.setItem('ita_ruolo', match.ruolo);
+    sessionStorage.setItem('ita_nome',  match.nome);
+    _avviaApp(match);
+  }
+
+  function pinLogout() {
+    sessionStorage.removeItem('ita_pin');
+    sessionStorage.removeItem('ita_ruolo');
+    sessionStorage.removeItem('ita_nome');
+    document.getElementById('layer-pin').style.display = 'flex';
+    document.querySelector('.sidebar').style.display = 'none';
+    document.querySelector('.main').style.display = 'none';
+    pinBuffer = '';
+    _aggiornaPin();
+  }
+
+  function _avviaApp(match) {
+    document.getElementById('layer-pin').style.display  = 'none';
+    document.getElementById('layer-home').style.display = 'none';
+    document.querySelector('.sidebar').style.display    = '';
+    document.querySelector('.main').style.display       = '';
+
+    // saluto
+    const ora = new Date().getHours();
+    const sal = ora < 12 ? 'Buongiorno' : ora < 18 ? 'Buon pomeriggio' : 'Buonasera';
+    const elSaluto = document.getElementById('home-saluto');
+    if (elSaluto) elSaluto.textContent = sal + ', ' + match.nome;
+
+    // badge ruolo topbar
+    const badge = document.getElementById('home-ruolo-badge');
+    if (badge) badge.textContent = match.label;
+
+    // visibilità scheda tecnica (solo admin e commerciale)
+    ruoloCorrente = match.ruolo;
+
+    caricaLead();
+  }
+
+  // ============================================================
+  //  BOOTSTRAP
+  // ============================================================
+  document.addEventListener('DOMContentLoaded', () => {
+    // Nasconde sidebar e main finché non autenticato
+    document.querySelector('.sidebar').style.display = 'none';
+    document.querySelector('.main').style.display    = 'none';
+
+    const pin   = sessionStorage.getItem('ita_pin');
+    const ruolo = sessionStorage.getItem('ita_ruolo');
+    const nome  = sessionStorage.getItem('ita_nome');
+
+    if (pin && PIN_RUOLI[pin]) {
+      const match = PIN_RUOLI[pin];
+      _avviaApp(match);
+    } else {
+      document.getElementById('layer-pin').style.display = 'flex';
+    }
+
+    // aggiornaOperaiBadge iniziale
+    aggiornaOperaiBadge();
+  });
+
+</script>
+<iframe name="iframe-nascosto" style="display:none"></iframe>
+</body>
+</html>
