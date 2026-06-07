@@ -789,6 +789,22 @@
       display: flex; align-items: center; justify-content: center;
     }
     .btn-apri-v5:hover { background: #f0f4ff; }
+    /* ---- Moduli aggiuntivi (mini-schede parallele: placcatura, VMC) ---- */
+    .btn-scheda.modulo-extra {
+      background: #fff4e8; border: 1.5px solid #f0c98a; color: #9a5a00;
+    }
+    .btn-scheda.modulo-extra:hover { background: #ffe9d0; }
+    .mini-scheda { margin-top: 8px; }
+    .prospetto-riga {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; color: var(--text); padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .prospetto-totale {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 15px; font-weight: 700; color: #1a3a8a;
+      padding: 10px 0 4px;
+    }
   </style>
 </head>
 <body>
@@ -978,6 +994,9 @@
 
       <a id="btn-whatsapp" class="btn-whatsapp" target="_blank">📱 Apri WhatsApp</a>
 
+      <!-- SUGGERIMENTO MODULI — basato sul problema segnalato dal cliente, MAI attivazione automatica -->
+      <div class="st-nota" id="suggerimento-moduli"></div>
+
       <!-- SCHEDA TECNICA 5 PANNELLI — visibile solo a commerciale e admin -->
       <button class="btn-scheda" id="btn-scheda-tecnica" onclick="toggleSchedaTecnica()" style="display:none">
         📐 Scheda tecnica — seconda chiamata
@@ -1105,6 +1124,8 @@
           <div id="st-nota-cond-p5" style="display:none;background:#e8fff0;border:1px solid #70c070;border-radius:6px;padding:8px 10px;font-size:11px;color:#1a5a1a;margin-bottom:10px;">
             🏢 Edificio con più piani — proponi il pacchetto condominiale.
           </div>
+          <!-- PROSPETTO UNIFICATO — confluiscono qui SOLO i moduli accesi e completati -->
+          <div id="prospetto-unificato" style="display:none"></div>
         </div>
 
         <!-- Navigazione pannelli -->
@@ -1119,6 +1140,55 @@
           <a class="btn-apri-v5" id="btn-apri-v5" href="#" target="_blank">📄 Preventivo completo</a>
         </div>
 
+      </div>
+
+      <!-- MODULO PLACCATURA ANTICONDENSA — mini-scheda parallela, si accende su decisione di Monica -->
+      <button class="btn-scheda modulo-extra" id="btn-modulo-placcatura" onclick="togglePlaccatura()" style="display:none">
+        🧱 + Modulo Placcatura anticondensa
+      </button>
+      <div class="st-wrapper mini-scheda" id="plac-wrapper">
+        <div class="st-pannello visibile">
+          <div class="st-title">🧱 Placcatura anticondensa</div>
+          <div class="st-field">
+            <label>Materiale / spessore (si parte da Poratec, si scala solo per vincoli di spazio)</label>
+            <select id="plac-materiale">
+              <option value="poratec">Poratec — 5 cm (consigliato)</option>
+              <option value="biomat">Biomat — 2,5 cm</option>
+              <option value="sanus">Sanus — 1,3 cm</option>
+            </select>
+          </div>
+          <div class="st-nota visibile" style="background:#fff8e6;border-color:#e8c44a;color:#7a5800;">
+            📏 Geometria: aggiungi le pareti interessate (larghezza in m). L'altezza usata è quella del pannello Costruttivo (default 2,70 m). Mq da confermare al sopralluogo.
+          </div>
+          <div id="plac-pareti-container"></div>
+          <button onclick="placAggiungiParete()" style="width:100%;padding:8px;margin-top:2px;background:#f8faff;border:1.5px dashed #c0d0ff;border-radius:7px;color:#2244aa;font-size:12px;font-weight:600;cursor:pointer;">+ Aggiungi parete</button>
+          <div id="plac-mq-totale" style="margin-top:10px;font-size:13px;color:#2244aa;font-weight:700;text-align:right;"></div>
+          <div class="st-actions" style="padding:12px 0 0">
+            <button class="btn-salva-stima" onclick="calcolaPlaccatura()">📐 Calcola placcatura</button>
+          </div>
+          <div class="st-output" id="plac-output" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- MODULO VMC PUNTUALE — mini-scheda parallela, si accende su decisione di Monica -->
+      <button class="btn-scheda modulo-extra" id="btn-modulo-vmc" onclick="toggleVMC()" style="display:none">
+        🌀 + Modulo VMC puntuale
+      </button>
+      <div class="st-wrapper mini-scheda" id="vmc-wrapper">
+        <div class="st-pannello visibile">
+          <div class="st-title">🌀 VMC puntuale</div>
+          <div class="st-field">
+            <label>Numero apparecchi (uno per stanza con problema segnalato)</label>
+            <input type="number" id="vmc-apparecchi" value="1" min="1" max="20" step="1">
+          </div>
+          <div class="st-nota visibile" style="background:#e8fff0;border-color:#70c070;color:#1a5a1a;">
+            💡 Valuta un apparecchio anche nelle camere da letto, a prescindere dal problema segnalato, per la qualità dell'aria. Tipo (incasso/parete) si decide solo al sopralluogo — il prezzo resta nello stesso range.
+          </div>
+          <div class="st-actions" style="padding:12px 0 0">
+            <button class="btn-salva-stima" onclick="calcolaVMC()">🌀 Calcola VMC</button>
+          </div>
+          <div class="st-output" id="vmc-output" style="display:none"></div>
+        </div>
       </div>
 
       <div class="footer-label">Fase pipeline</div>
@@ -1433,16 +1503,18 @@
 
     document.getElementById('overlay').classList.add('aperta');
 
-    // Scheda tecnica — visibile solo a commerciale e admin
+    // Scheda tecnica e moduli aggiuntivi — visibili solo a commerciale e admin
     const btnScheda = document.getElementById('btn-scheda-tecnica');
-    if (ruoloCorrente === 'commerciale' || ruoloCorrente === 'admin') {
-      btnScheda.style.display = 'block';
-    } else {
-      btnScheda.style.display = 'none';
-    }
-    // Chiudi scheda tecnica e resetta al pannello 1
+    const btnPlac   = document.getElementById('btn-modulo-placcatura');
+    const btnVmc    = document.getElementById('btn-modulo-vmc');
+    const visibileModuli = (ruoloCorrente === 'commerciale' || ruoloCorrente === 'admin');
+    [btnScheda, btnPlac, btnVmc].forEach(b => { if (b) b.style.display = visibileModuli ? 'block' : 'none'; });
+    // Chiudi scheda tecnica e moduli aggiuntivi, resetta al pannello 1
     const stWrap = document.getElementById('st-wrapper');
     if (stWrap) stWrap.classList.remove('aperto');
+    chiudiModuliAggiuntivi();
+    // Suggerimento moduli in base al problema segnalato (solo segnalazione, decide Monica)
+    aggiornaSuggerimentoModuli();
     stPannelloCorrente = 1;
     // Pre-compila pannello 1 con i dati già nel lead
     const pianoLead = parseInt(leadCorrente.piano) || 0;
@@ -1484,6 +1556,10 @@
     const stCont = document.getElementById('st-stanze-container');
     if (stCont) stCont.innerHTML = '';
     window._stStima = null;
+    window._stimaCalcolata = null;
+    chiudiModuliAggiuntivi();
+    const sugg = document.getElementById('suggerimento-moduli');
+    if (sugg) { sugg.innerHTML = ''; sugg.classList.remove('visibile'); }
     leadCorrente = null;
   }
 
@@ -1715,6 +1791,208 @@
     }
   }
 
+  // ============================================================
+  //  MODULI AGGIUNTIVI — mini-schede parallele
+  //  (Placcatura anticondensa, VMC puntuale)
+  //  Si aprono SOLO su decisione manuale di Monica durante la
+  //  chiamata; confluiscono nel prospetto unificato del pannello 5.
+  // ============================================================
+
+  // ── Modulo Placcatura anticondensa ─────────────────────────
+  let _placParCnt = 0;
+
+  function togglePlaccatura() {
+    const w = document.getElementById('plac-wrapper');
+    w.classList.toggle('aperto');
+    if (w.classList.contains('aperto') && !document.getElementById('plac-pareti-container').children.length) {
+      placAggiungiParete();
+    }
+  }
+
+  function placAggiungiParete() {
+    _placParCnt++;
+    const pid = _placParCnt;
+    const container = document.getElementById('plac-pareti-container');
+    const row = document.createElement('div');
+    row.className = 'st-parete-block';
+    row.id = 'plac-par-' + pid;
+    row.innerHTML = `
+      <div class="st-parete-row">
+        <span class="st-row-label">P${pid}</span>
+        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.1" oninput="placAggiornaMq()" onkeydown="stEnterNext(event)">
+        <button class="btn-rm" onclick="document.getElementById('plac-par-${pid}').remove();placAggiornaMq()">✕</button>
+      </div>
+    `;
+    container.appendChild(row);
+    placAggiornaMq();
+  }
+
+  function placAggiornaMq() {
+    const altezza = parseFloat(document.getElementById('st-altezza') ? document.getElementById('st-altezza').value : '') || 2.7;
+    let mq = 0;
+    document.querySelectorAll('#plac-pareti-container .st-parete-row input').forEach(inp => {
+      mq += (parseFloat(inp.value) || 0) * altezza;
+    });
+    const totEl = document.getElementById('plac-mq-totale');
+    if (totEl) totEl.textContent = mq > 0 ? 'Totale: ' + mq.toFixed(1) + ' mq' : '';
+    return mq;
+  }
+
+  function calcolaPlaccatura() {
+    const materiale = document.getElementById('plac-materiale').value;
+    const prezziMq  = { poratec: 60, biomat: 50, sanus: 35 };
+    const spessori  = { poratec: '5 cm', biomat: '2,5 cm', sanus: '1,3 cm' };
+    const nomi      = { poratec: 'Poratec', biomat: 'Biomat', sanus: 'Sanus' };
+    const altezza = parseFloat(document.getElementById('st-altezza') ? document.getElementById('st-altezza').value : '') || 2.7;
+
+    let larghTot = 0;
+    document.querySelectorAll('#plac-pareti-container .st-parete-row input').forEach(inp => {
+      larghTot += parseFloat(inp.value) || 0;
+    });
+    if (larghTot <= 0) { alert('Inserisci almeno una parete con larghezza.'); return; }
+
+    const mqTot = larghTot * altezza;
+    const prezzoMq = prezziMq[materiale];
+    let totale = 800 + mqTot * prezzoMq;
+    totale = Math.ceil(totale / 10) * 10;
+
+    const tags = [
+      mqTot.toFixed(1) + ' mq',
+      nomi[materiale] + ' ' + spessori[materiale],
+      prezzoMq + ' €/mq',
+      'Minimo intervento incluso (€800)'
+    ];
+    const tagsHtml = tags.map(t => '<span class="st-tag">' + t + '</span>').join('');
+    const out = document.getElementById('plac-output');
+    out.style.display = 'block';
+    out.innerHTML =
+      '<div class="st-stima-range"><span class="st-range-min">€ ' + totale.toLocaleString('it-IT') + '</span></div>' +
+      '<div class="st-tags">' + tagsHtml + '</div>' +
+      '<div class="st-disclaimer">Stima indicativa · Placcatura anticondensa — mq da confermare al sopralluogo, ciclo incollaggio/rasatura incluso</div>';
+
+    window._plStima = { totale, mq: parseFloat(mqTot.toFixed(1)), materiale };
+    aggiornaProspetto();
+  }
+
+  // ── Modulo VMC puntuale ─────────────────────────────────────
+  function toggleVMC() {
+    document.getElementById('vmc-wrapper').classList.toggle('aperto');
+  }
+
+  function calcolaVMC() {
+    const n = parseInt(document.getElementById('vmc-apparecchi').value) || 0;
+    if (n <= 0) { alert('Indica almeno un apparecchio.'); return; }
+    const prezzoUnit = 1300;
+    let scontoPerc = 0;
+    if (n === 2) scontoPerc = 5;
+    else if (n === 3) scontoPerc = 8;
+    else if (n > 3) scontoPerc = 12;
+    const lordo = n * prezzoUnit;
+    const totale = Math.round(lordo * (1 - scontoPerc / 100));
+
+    const tags = [
+      n + (n === 1 ? ' apparecchio' : ' apparecchi'),
+      prezzoUnit.toLocaleString('it-IT') + ' €/cad. (lordo)',
+    ];
+    if (scontoPerc > 0) tags.push('Sconto quantità -' + scontoPerc + '%');
+    tags.push('Tipo incasso/parete da definire al sopralluogo');
+
+    const tagsHtml = tags.map(t => '<span class="st-tag">' + t + '</span>').join('');
+    const out = document.getElementById('vmc-output');
+    out.style.display = 'block';
+    out.innerHTML =
+      '<div class="st-stima-range"><span class="st-range-min">€ ' + totale.toLocaleString('it-IT') + '</span></div>' +
+      '<div class="st-tags">' + tagsHtml + '</div>' +
+      '<div class="st-disclaimer">Stima indicativa · VMC puntuale — il prezzo resta nello stesso range a prescindere dal tipo scelto al sopralluogo</div>';
+
+    window._vmcStima = { totale, apparecchi: n };
+    aggiornaProspetto();
+  }
+
+  // ── Prospetto unificato — confluiscono SOLO i moduli accesi e completati ──
+  function aggiornaProspetto() {
+    const cont = document.getElementById('prospetto-unificato');
+    if (!cont) return;
+    const voci = [];
+    let totMin = 0, totMax = 0;
+
+    if (window._stimaCalcolata) {
+      const s = window._stimaCalcolata;
+      voci.push({ label: '🌬️ Insufflaggio cellulosa', min: s.stiMin, max: s.stiMax });
+      totMin += s.stiMin; totMax += s.stiMax;
+    }
+    if (window._plStima) {
+      const p = window._plStima;
+      voci.push({ label: '🧱 Placcatura anticondensa', min: p.totale, max: p.totale });
+      totMin += p.totale; totMax += p.totale;
+    }
+    if (window._vmcStima) {
+      const v = window._vmcStima;
+      voci.push({ label: '🌀 VMC puntuale (' + v.apparecchi + ' app.)', min: v.totale, max: v.totale });
+      totMin += v.totale; totMax += v.totale;
+    }
+
+    if (voci.length < 2) { cont.style.display = 'none'; cont.innerHTML = ''; return; }
+
+    const righe = voci.map(v => {
+      const valore = (v.min === v.max)
+        ? '€ ' + v.min.toLocaleString('it-IT')
+        : '€ ' + v.min.toLocaleString('it-IT') + ' – € ' + v.max.toLocaleString('it-IT');
+      return '<div class="prospetto-riga"><span>' + v.label + '</span><span>' + valore + '</span></div>';
+    }).join('');
+
+    cont.style.display = 'block';
+    cont.innerHTML =
+      '<div class="st-title" style="margin-top:14px">📊 Prospetto complessivo — moduli attivi</div>' +
+      righe +
+      '<div class="prospetto-totale"><span>Totale stimato</span><span>€ ' + totMin.toLocaleString('it-IT') + ' – € ' + totMax.toLocaleString('it-IT') + '</span></div>' +
+      '<div class="st-disclaimer">Prospetto modulare — somma dei soli moduli accesi e completati da Monica. Valori da confermare al sopralluogo.</div>';
+  }
+
+  // ── Suggerimento moduli — basato sul "problema" segnalato dal cliente ──
+  // Regola architetturale: è SOLO un suggerimento, mai un'attivazione automatica.
+  // La decisione di aprire un modulo resta sempre manuale, in capo a Monica.
+  function aggiornaSuggerimentoModuli() {
+    const box = document.getElementById('suggerimento-moduli');
+    if (!box || !leadCorrente) return;
+    const problema = (leadCorrente.problema || '').toLowerCase();
+    const spunti = [];
+    if (problema.includes('umidità') || problema.includes('umidita') || problema.includes('muffa') || problema.includes('condensa')) {
+      spunti.push('🧱 valuta il modulo <b>Placcatura anticondensa</b>');
+    }
+    if (problema.includes('umidità') || problema.includes('umidita') || problema.includes('muffa') || problema.includes('condensa') || problema.includes('aria') || problema.includes('ricambio')) {
+      spunti.push('🌀 valuta il modulo <b>VMC puntuale</b> (proponibile anche in camera da letto, a prescindere, per la qualità dell&#39;aria)');
+    }
+    if (spunti.length) {
+      box.innerHTML = '💡 <b>Suggerimento</b> in base al problema segnalato (' + (leadCorrente.problema || '') + '): ' + spunti.join(' · ') + '. Decide Monica in chiamata se aprirli.';
+      box.classList.add('visibile');
+    } else {
+      box.innerHTML = '';
+      box.classList.remove('visibile');
+    }
+  }
+
+  // ── Reset moduli aggiuntivi (alla chiusura del modale) ──
+  function chiudiModuliAggiuntivi() {
+    ['plac-wrapper', 'vmc-wrapper'].forEach(id => {
+      const w = document.getElementById(id);
+      if (w) w.classList.remove('aperto');
+    });
+    const placCont = document.getElementById('plac-pareti-container');
+    if (placCont) placCont.innerHTML = '';
+    _placParCnt = 0;
+    const placOut = document.getElementById('plac-output');
+    if (placOut) { placOut.style.display = 'none'; placOut.innerHTML = ''; }
+    const vmcOut = document.getElementById('vmc-output');
+    if (vmcOut) { vmcOut.style.display = 'none'; vmcOut.innerHTML = ''; }
+    const vmcInput = document.getElementById('vmc-apparecchi');
+    if (vmcInput) vmcInput.value = '1';
+    const prospetto = document.getElementById('prospetto-unificato');
+    if (prospetto) { prospetto.style.display = 'none'; prospetto.innerHTML = ''; }
+    window._plStima = null;
+    window._vmcStima = null;
+  }
+
   function calcolaStima() {
     // ---- dati pannelli ----
     const piano     = parseInt(document.getElementById('st-piano').value)   || 0;
@@ -1815,6 +2093,7 @@
     }
 
     window._stimaCalcolata = { stiMin, stiMax, mq: parseFloat(mqTot.toFixed(1)), cm: cavita };
+    aggiornaProspetto();
   }
 
   function salvaStima() {
