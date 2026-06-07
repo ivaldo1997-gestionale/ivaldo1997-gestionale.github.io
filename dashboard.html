@@ -683,6 +683,12 @@
       font-weight: 600; cursor: pointer; transition: background 0.15s;
     }
     .btn-scheda:hover { background: #dce8ff; }
+    /* Valore stima sempre visibile accanto al pulsante che apre il modulo — 0 se nulla salvato/calcolato */
+    .modulo-valore {
+      display: inline-block; margin-left: 8px; padding: 2px 9px;
+      background: #fff; border: 1px solid #c0d0ff; border-radius: 10px;
+      font-size: 11px; font-weight: 800; color: #2244aa; vertical-align: middle;
+    }
     .st-wrapper {
       display: none; margin-top: 12px;
       background: #f8faff; border: 1.5px solid #c0d0ff;
@@ -1093,7 +1099,7 @@
 
       <!-- MODULO INSUFFLAGGIO — esistente/INTOCCATO nel calcolo, ora mini-scheda parallela come Placcatura e VMC -->
       <button class="btn-scheda modulo-extra" id="btn-modulo-insufflaggio" onclick="toggleInsufflaggio()" style="display:none">
-        🌬️ + Modulo Insufflaggio
+        🌬️ + Modulo Insufflaggio <span class="modulo-valore" id="ins-badge-valore">€ 0</span>
       </button>
       <div class="st-wrapper mini-scheda" id="ins-wrapper">
         <div class="st-pannello visibile">
@@ -1140,7 +1146,7 @@
 
       <!-- MODULO PLACCATURA ANTICONDENSA — mini-scheda parallela, si accende su decisione di Monica -->
       <button class="btn-scheda modulo-extra" id="btn-modulo-placcatura" onclick="togglePlaccatura()" style="display:none">
-        🧱 + Modulo Placcatura anticondensa
+        🧱 + Modulo Placcatura anticondensa <span class="modulo-valore" id="plac-badge-valore">€ 0</span>
       </button>
       <div class="st-wrapper mini-scheda" id="plac-wrapper">
         <div class="st-pannello visibile">
@@ -1168,7 +1174,7 @@
 
       <!-- MODULO VMC PUNTUALE — mini-scheda parallela, si accende su decisione di Monica -->
       <button class="btn-scheda modulo-extra" id="btn-modulo-vmc" onclick="toggleVMC()" style="display:none">
-        🌀 + Modulo VMC puntuale
+        🌀 + Modulo VMC puntuale <span class="modulo-valore" id="vmc-badge-valore">€ 0</span>
       </button>
       <div class="st-wrapper mini-scheda" id="vmc-wrapper">
         <div class="st-pannello visibile">
@@ -1296,6 +1302,12 @@
       anno: String(r['Anno Edificio'] || ''),
       stanze: String(r['Stanze Coinvolte'] || ''),
       pareti: r['Pareti Doppie'] || '',
+      tipo_immobile: r['Tipo Immobile'] || '',
+      piani_totali: r['Piani Totali'] || '',
+      altezza_soffitto: r['Altezza Soffitto'] || '',
+      edificio_abitato: r['Edificio Abitato'] || '',
+      accesso_furgone: r['Accesso Furgone'] || '',
+      note_operative: r['Note Operative'] || '',
       ater: r['Flag ATER'] || 'No',
       pianoterra: r['Flag Piano Terra'] || 'No',
       budget: r['Budget Orientativo'] || '',
@@ -1527,12 +1539,33 @@
     aggiornaSuggerimentoModuli();
     // Ripresenta nel pannello stima eventuali valori placcatura/VMC già salvati in precedenza
     precaricaModuliSalvati();
-    // Pre-compila i dati generali già presenti nel lead
+    // Pre-compila i dati generali — dal lead originale, sovrascritti dall'ultima conferma salvata
     const pianoLead = parseInt(leadCorrente.piano) || 0;
     document.getElementById('st-piano').value = pianoLead;
-    if (leadCorrente.anno_edificio) document.getElementById('st-anno').value = leadCorrente.anno_edificio;
-    if (leadCorrente.stanze_coinvolte) document.getElementById('st-stanze-n').value = leadCorrente.stanze_coinvolte;
+    if (leadCorrente.anno)   document.getElementById('st-anno').value = leadCorrente.anno;
+    if (leadCorrente.stanze) document.getElementById('st-stanze-n').value = leadCorrente.stanze;
+    // Pareti doppie: il lead originale può avere un testo libero ("Sì, pareti doppie…"),
+    // la scheda invece salva sempre il valore canonico "si"/"no" — gestiamo entrambi i formati
+    const pVal = leadCorrente.pareti || '';
+    if (pVal === 'si' || pVal === 'no')  document.getElementById('st-pareti-doppie').value = pVal;
+    else if (/^s[iì]/i.test(pVal))       document.getElementById('st-pareti-doppie').value = 'si';
+    else if (/^no/i.test(pVal))          document.getElementById('st-pareti-doppie').value = 'no';
+    // Tipo immobile: applichiamo solo valori che corrispondono a un'opzione valida della select
+    const tImm = document.getElementById('st-tipo-imm');
+    if (tImm && leadCorrente.tipo_immobile &&
+        Array.from(tImm.options).some(o => o.value === leadCorrente.tipo_immobile)) {
+      tImm.value = leadCorrente.tipo_immobile;
+    }
+    if (leadCorrente.piani_totali)     document.getElementById('st-piani-tot').value = leadCorrente.piani_totali;
+    if (leadCorrente.altezza_soffitto) document.getElementById('st-altezza').value = leadCorrente.altezza_soffitto;
+    if (leadCorrente.edificio_abitato === 'si' || leadCorrente.edificio_abitato === 'no')
+      document.getElementById('st-abitato').value = leadCorrente.edificio_abitato;
+    if (leadCorrente.accesso_furgone === 'diretto' || leadCorrente.accesso_furgone === 'scarico')
+      document.getElementById('st-accesso').value = leadCorrente.accesso_furgone;
+    if (leadCorrente.note_operative) document.getElementById('st-note-op').value = leadCorrente.note_operative;
     aggiornaNoteCondominiale();
+    aggiornaOperaiBadge();
+    aggiornaCavita();
     window._stStima = null;
 
     } catch(err) {
@@ -1576,6 +1609,7 @@
     if (notaP5) notaP5.style.display = 'none';
     window._stStima = null;
     window._stimaCalcolata = null;
+    impostaBadgeModulo('ins-badge-valore', null);
     chiudiModuliAggiuntivi();
     const sugg = document.getElementById('suggerimento-moduli');
     if (sugg) { sugg.innerHTML = ''; sugg.classList.remove('visibile'); }
@@ -1610,14 +1644,37 @@
   // ============================================================
   let stanzaCounter = 0;
 
+  // ── Badge valore accanto al pulsante del modulo — sempre visibile, "€ 0" se nulla calcolato/salvato ──
+  function impostaBadgeModulo(id, testo) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = testo || '€ 0';
+  }
+
+  // ── Accordion fra le schede del modale: aprendone una si chiudono le altre, ──
+  // ── così la visualizzazione resta contestualizzata sulla scheda corrente   ──
+  // ── e le altre restano ridotte a semplice pulsante.                        ──
+  const PANNELLI_SCHEDA = ['dg-wrapper', 'ins-wrapper', 'plac-wrapper', 'vmc-wrapper'];
+  function chiudiAltriPannelli(idDaTenereAperto) {
+    PANNELLI_SCHEDA.forEach(id => {
+      if (id === idDaTenereAperto) return;
+      const w = document.getElementById(id);
+      if (w) w.classList.remove('aperto');
+    });
+  }
+
   function toggleDatiGenerali() {
     const w = document.getElementById('dg-wrapper');
-    if (w) w.classList.toggle('aperto');
+    if (!w) return;
+    const stavaChiuso = !w.classList.contains('aperto');
+    if (stavaChiuso) chiudiAltriPannelli('dg-wrapper');
+    w.classList.toggle('aperto');
   }
 
   function toggleInsufflaggio() {
     const w = document.getElementById('ins-wrapper');
     if (!w) return;
+    const stavaChiuso = !w.classList.contains('aperto');
+    if (stavaChiuso) chiudiAltriPannelli('ins-wrapper');
     w.classList.toggle('aperto');
     if (w.classList.contains('aperto') && !document.getElementById('st-stanze-container').children.length) {
       aggiungiStanza();
@@ -1806,6 +1863,9 @@
 
   function togglePlaccatura() {
     const w = document.getElementById('plac-wrapper');
+    if (!w) return;
+    const stavaChiuso = !w.classList.contains('aperto');
+    if (stavaChiuso) chiudiAltriPannelli('plac-wrapper');
     w.classList.toggle('aperto');
     if (w.classList.contains('aperto') && !document.getElementById('plac-pareti-container').children.length) {
       placAggiungiParete();
@@ -1874,12 +1934,17 @@
       '<div class="st-disclaimer">Stima indicativa · Placcatura anticondensa — mq da confermare al sopralluogo, ciclo incollaggio/rasatura incluso</div>';
 
     window._plStima = { totale, mq: parseFloat(mqTot.toFixed(1)), materiale };
+    impostaBadgeModulo('plac-badge-valore', '€ ' + totale.toLocaleString('it-IT'));
     aggiornaProspetto();
   }
 
   // ── Modulo VMC puntuale ─────────────────────────────────────
   function toggleVMC() {
-    document.getElementById('vmc-wrapper').classList.toggle('aperto');
+    const w = document.getElementById('vmc-wrapper');
+    if (!w) return;
+    const stavaChiuso = !w.classList.contains('aperto');
+    if (stavaChiuso) chiudiAltriPannelli('vmc-wrapper');
+    w.classList.toggle('aperto');
   }
 
   function calcolaVMC() {
@@ -1909,6 +1974,7 @@
       '<div class="st-disclaimer">Stima indicativa · VMC puntuale — il prezzo resta nello stesso range a prescindere dal tipo scelto al sopralluogo</div>';
 
     window._vmcStima = { totale, apparecchi: n };
+    impostaBadgeModulo('vmc-badge-valore', '€ ' + totale.toLocaleString('it-IT'));
     aggiornaProspetto();
   }
 
@@ -1994,6 +2060,8 @@
     if (prospetto) { prospetto.style.display = 'none'; prospetto.innerHTML = ''; }
     window._plStima = null;
     window._vmcStima = null;
+    impostaBadgeModulo('plac-badge-valore', null);
+    impostaBadgeModulo('vmc-badge-valore', null);
   }
 
   // ── Precarica nel pannello stima eventuali valori placcatura/VMC già salvati ──
@@ -2007,6 +2075,7 @@
       const mq = parseFloat(leadCorrente.placcatura_mq) || 0;
       const materiale = leadCorrente.placcatura_materiale || 'poratec';
       window._plStima = { totale, mq, materiale };
+      impostaBadgeModulo('plac-badge-valore', '€ ' + totale.toLocaleString('it-IT'));
 
       const nomi = { poratec: 'Poratec 5 cm', biomat: 'Biomat 2,5 cm', sanus: 'Sanus 1,3 cm' };
       const sel = document.getElementById('plac-materiale');
@@ -2022,13 +2091,14 @@
           '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se la geometria è cambiata</div>';
       }
       const wrap = document.getElementById('plac-wrapper');
-      if (wrap) wrap.classList.add('aperto');
+      if (wrap) { chiudiAltriPannelli('plac-wrapper'); wrap.classList.add('aperto'); }
     }
 
     if (leadCorrente.vmc_stima) {
       const totale = parseFloat(leadCorrente.vmc_stima) || 0;
       const apparecchi = parseInt(leadCorrente.vmc_apparecchi) || 0;
       window._vmcStima = { totale, apparecchi };
+      impostaBadgeModulo('vmc-badge-valore', '€ ' + totale.toLocaleString('it-IT'));
 
       const inp = document.getElementById('vmc-apparecchi');
       if (inp && apparecchi) inp.value = apparecchi;
@@ -2042,7 +2112,37 @@
           '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se il numero di apparecchi è cambiato</div>';
       }
       const wrap = document.getElementById('vmc-wrapper');
-      if (wrap) wrap.classList.add('aperto');
+      if (wrap) { chiudiAltriPannelli('vmc-wrapper'); wrap.classList.add('aperto'); }
+    }
+
+    // ── Insufflaggio — stesso trattamento: valore salvato sempre visibile, scheda per scheda ──
+    if (leadCorrente.stima_min) {
+      const stiMin = parseFloat(leadCorrente.stima_min) || 0;
+      const stiMax = parseFloat(leadCorrente.stima_max) || stiMin;
+      const mq     = parseFloat(leadCorrente.superficie_mq) || 0;
+      const cm     = parseFloat(leadCorrente.spessore_cm) || 0;
+      window._stimaCalcolata = { stiMin, stiMax, mq, cm };
+      impostaBadgeModulo('ins-badge-valore', '€ ' + stiMin.toLocaleString('it-IT') + '–' + stiMax.toLocaleString('it-IT'));
+
+      const out = document.getElementById('st-output');
+      if (out) {
+        out.innerHTML =
+          '<div class="st-stima-range">' +
+            '<span class="st-range-min">€ ' + stiMin.toLocaleString('it-IT') + '</span>' +
+            '<span class="st-range-sep"> — </span>' +
+            '<span class="st-range-max">€ ' + stiMax.toLocaleString('it-IT') + '</span>' +
+          '</div>' +
+          '<div class="st-tags"><span class="st-tag">📋 Valore salvato in precedenza</span>' +
+          (mq ? '<span class="st-tag">' + mq.toFixed(1) + ' mq netti</span>' : '') +
+          (cm ? '<span class="st-tag">Cavità ' + cm + ' cm</span>' : '') + '</div>' +
+          '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se la geometria è cambiata</div>';
+        out.dataset.min = stiMin;
+        out.dataset.max = stiMax;
+        if (mq) out.dataset.mq = mq;
+        if (cm) out.dataset.cm = cm;
+      }
+      const wrapIns = document.getElementById('ins-wrapper');
+      if (wrapIns) { chiudiAltriPannelli('ins-wrapper'); wrapIns.classList.add('aperto'); }
     }
 
     aggiornaProspetto();
@@ -2148,6 +2248,7 @@
     }
 
     window._stimaCalcolata = { stiMin, stiMax, mq: parseFloat(mqTot.toFixed(1)), cm: cavita };
+    impostaBadgeModulo('ins-badge-valore', '€ ' + stiMin.toLocaleString('it-IT') + '–' + stiMax.toLocaleString('it-IT'));
     aggiornaProspetto();
   }
 
@@ -2156,16 +2257,34 @@
     const haInsufflaggio = !!out.dataset.min;
     const haPlaccatura   = !!window._plStima;
     const haVmc          = !!window._vmcStima;
-    // Si può salvare se è stato calcolato ALMENO UNO dei moduli — sono indipendenti
-    if (!haInsufflaggio && !haPlaccatura && !haVmc) {
-      alert('Calcola prima almeno una stima (insufflaggio, placcatura o VMC) nel pannello 5.');
+    if (!leadCorrente) { alert('Nessun lead selezionato.'); return; }
+
+    // Dati edificio e logistica — generali, validi per tutti i moduli: si salvano sempre,
+    // anche da soli, così non si perdono mai indipendentemente dal calcolo di una stima
+    const datiGen = {
+      anno_edificio:     document.getElementById('st-anno').value,
+      piano:             document.getElementById('st-piano').value,
+      stanze_coinvolte:  document.getElementById('st-stanze-n').value,
+      tipo_immobile:     document.getElementById('st-tipo-imm').value,
+      pareti_doppie:     document.getElementById('st-pareti-doppie').value,
+      piani_totali:      document.getElementById('st-piani-tot').value,
+      altezza_soffitto:  document.getElementById('st-altezza').value,
+      edificio_abitato:  document.getElementById('st-abitato').value,
+      accesso_furgone:   document.getElementById('st-accesso').value,
+      note_operative:    document.getElementById('st-note-op').value
+    };
+    const haDatiGenerali = Object.values(datiGen).some(v => v !== '' && v !== null && v !== undefined);
+
+    // Si può salvare se c'è almeno qualcosa da salvare: una stima calcolata oppure dati generali compilati
+    if (!haInsufflaggio && !haPlaccatura && !haVmc && !haDatiGenerali) {
+      alert('Compila almeno un campo dei dati edificio oppure calcola una stima (insufflaggio, placcatura o VMC) prima di salvare.');
       return;
     }
-    if (!leadCorrente) { alert('Nessun lead selezionato.'); return; }
     const dati = {
       action: 'aggiornaLead',
       id: leadCorrente.id
     };
+    Object.assign(dati, datiGen);
     if (haInsufflaggio) {
       dati.superficie_mq = out.dataset.mq;
       dati.spessore_cm   = out.dataset.cm;
