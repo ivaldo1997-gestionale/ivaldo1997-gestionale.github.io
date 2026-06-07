@@ -2157,23 +2157,32 @@
 
   function salvaStima() {
     const out = document.getElementById('st-output');
-    if (!out.dataset.min) { alert('Calcola prima la stima (vai al pannello 5).'); return; }
+    const haInsufflaggio = !!out.dataset.min;
+    const haPlaccatura   = !!window._plStima;
+    const haVmc          = !!window._vmcStima;
+    // Si può salvare se è stato calcolato ALMENO UNO dei moduli — sono indipendenti
+    if (!haInsufflaggio && !haPlaccatura && !haVmc) {
+      alert('Calcola prima almeno una stima (insufflaggio, placcatura o VMC) nel pannello 5.');
+      return;
+    }
     if (!leadCorrente) { alert('Nessun lead selezionato.'); return; }
     const dati = {
       action: 'aggiornaLead',
-      id: leadCorrente.id,
-      superficie_mq: out.dataset.mq,
-      spessore_cm:   out.dataset.cm,
-      stima_min:     out.dataset.min,
-      stima_max:     out.dataset.max
+      id: leadCorrente.id
     };
+    if (haInsufflaggio) {
+      dati.superficie_mq = out.dataset.mq;
+      dati.spessore_cm   = out.dataset.cm;
+      dati.stima_min     = out.dataset.min;
+      dati.stima_max     = out.dataset.max;
+    }
     // Moduli paralleli — valori salvati separati dall'insufflaggio
-    if (window._plStima) {
+    if (haPlaccatura) {
       dati.placcatura_stima = window._plStima.totale;
       dati.placcatura_mq = window._plStima.mq;
       dati.placcatura_materiale = window._plStima.materiale;
     }
-    if (window._vmcStima) {
+    if (haVmc) {
       dati.vmc_stima = window._vmcStima.totale;
       dati.vmc_apparecchi = window._vmcStima.apparecchi;
     }
