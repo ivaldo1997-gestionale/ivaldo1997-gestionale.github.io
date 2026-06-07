@@ -398,6 +398,29 @@
       z-index: 10;
     }
     .modale-titolo { font-size: 16px; font-weight: 700; }
+    .modale.schermo-intero {
+      width: 100vw;
+      max-width: 100vw;
+    }
+    .modale.schermo-intero .modale-body,
+    .modale.schermo-intero .modale-footer {
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .btn-schermo-intero {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+    .btn-schermo-intero:hover { background: #f4f6fb; color: var(--text); }
     .btn-chiudi {
       background: none;
       border: none;
@@ -978,7 +1001,10 @@
   <div class="modale" id="modale">
     <div class="modale-header">
       <div class="modale-titolo" id="modale-titolo">Lead</div>
-      <button class="btn-chiudi" onclick="chiudiModale()">✕</button>
+      <div style="display:flex;align-items:center">
+        <button class="btn-schermo-intero" id="btn-schermo-intero" onclick="toggleSchermoIntero()" title="Vista grande della scheda — solo grafica, puoi usarla o no">🖥️ Schermo intero</button>
+        <button class="btn-chiudi" onclick="chiudiModale()">✕</button>
+      </div>
     </div>
     <div class="modale-body" id="modale-body"></div>
     <div class="modale-footer">
@@ -1136,7 +1162,6 @@
 
         <!-- Azioni pannello 5 -->
         <div class="st-actions" id="st-actions" style="display:none">
-          <button class="btn-salva-stima" onclick="salvaStima()">💾 Salva stima</button>
           <a class="btn-apri-v5" id="btn-apri-v5" href="#" target="_blank">📄 Preventivo completo</a>
         </div>
 
@@ -1190,6 +1215,9 @@
           <div class="st-output" id="vmc-output" style="display:none"></div>
         </div>
       </div>
+
+      <!-- Salva stima — fuori dai pannelli/moduli: vale per insufflaggio, placcatura e VMC, indipendentemente da quale sia stato calcolato -->
+      <button class="btn-salva-stima" id="btn-salva-stima-globale" style="width:100%;margin-top:10px" onclick="salvaStima()">💾 Salva stima</button>
 
       <div class="footer-label">Fase pipeline</div>
       <select class="stato-select" id="stato-select">
@@ -1568,10 +1596,24 @@
     const sugg = document.getElementById('suggerimento-moduli');
     if (sugg) { sugg.innerHTML = ''; sugg.classList.remove('visibile'); }
     leadCorrente = null;
+    // Ripristina la vista laterale di default alla chiusura
+    const modale = document.getElementById('modale');
+    if (modale) modale.classList.remove('schermo-intero');
+    const btnSi = document.getElementById('btn-schermo-intero');
+    if (btnSi) btnSi.textContent = '🖥️ Schermo intero';
   }
 
   function chiudiModaleSeFuori(e) {
     if (e.target === document.getElementById('overlay')) chiudiModale();
+  }
+
+  // ── Vista a schermo intero — solo grafica, opzionale, per chi trova il pannello laterale poco visibile ──
+  function toggleSchermoIntero() {
+    const modale = document.getElementById('modale');
+    const btn = document.getElementById('btn-schermo-intero');
+    if (!modale || !btn) return;
+    const attivo = modale.classList.toggle('schermo-intero');
+    btn.textContent = attivo ? '↩️ Vista laterale' : '🖥️ Schermo intero';
   }
 
   function aggiornaScoringUI() {} // mantenuto per compatibilità
@@ -2187,7 +2229,7 @@
       dati.vmc_apparecchi = window._vmcStima.apparecchi;
     }
     inviaAggiornamento(dati).then(() => {
-      const btn = document.querySelector('.btn-salva-stima');
+      const btn = document.getElementById('btn-salva-stima-globale');
       if (btn) {
         btn.textContent = '✅ Salvata';
         setTimeout(() => { btn.textContent = '💾 Salva stima'; }, 2000);
