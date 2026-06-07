@@ -1625,7 +1625,7 @@
     block.innerHTML = `
       <div class="st-parete-row">
         <span class="st-row-label">P${pid}</span>
-        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.1" oninput="aggiornaMqLive()">
+        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.1" oninput="aggiornaMqLive()" onkeydown="stEnterNext(event)">
         <button class="btn-add-fin-par" onclick="aggiungiFinestra(${sid},${pid})">+ Finestra</button>
         <button class="btn-rm" onclick="document.getElementById('st-par-${sid}-${pid}').remove();aggiornaMqLive()">✕</button>
       </div>
@@ -1644,14 +1644,14 @@
     if (chiusura === 'avvolgibili') {
       row.innerHTML = `
         <span class="st-row-label fin">F${pid}.${n}</span>
-        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()">
+        <input type="number" placeholder="larghezza (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()" onkeydown="stEnterNext(event)">
         <button class="btn-rm" onclick="this.parentElement.remove();aggiornaMqLive()">✕</button>
       `;
     } else {
       row.innerHTML = `
         <span class="st-row-label fin">F${pid}.${n}</span>
-        <input type="number" placeholder="L (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()">
-        <input type="number" placeholder="H (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()">
+        <input type="number" placeholder="L (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()" onkeydown="stEnterNext(event)">
+        <input type="number" placeholder="H (m)" min="0.1" step="0.05" oninput="aggiornaMqLive()" onkeydown="stEnterNext(event)">
         <button class="btn-rm" onclick="this.parentElement.remove();aggiornaMqLive()">✕</button>
       `;
     }
@@ -2073,19 +2073,21 @@
 
     // aggiornaOperaiBadge iniziale
     aggiornaOperaiBadge();
-
-    // Auto-avanzamento cursore nella scheda tecnica (tasto Invio)
-    document.getElementById('st-wrapper').addEventListener('keydown', function(e) {
-      if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
-      e.preventDefault();
-      const all = Array.from(document.getElementById('st-wrapper').querySelectorAll('input[type="number"]'));
-      const idx = all.indexOf(e.target);
-      if (idx >= 0 && idx < all.length - 1) {
-        all[idx + 1].focus();
-        all[idx + 1].select();
-      }
-    });
   });
+
+  // Auto-avanzamento cursore nei campi misura (tasto Invio) — pareti e finestre
+  function stEnterNext(e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const wrapper = document.getElementById('st-stanze-container');
+    if (!wrapper) return;
+    const all = Array.from(wrapper.querySelectorAll('input[type="number"]'));
+    const idx = all.indexOf(e.target);
+    if (idx >= 0 && idx < all.length - 1) {
+      all[idx + 1].focus();
+      all[idx + 1].select();
+    }
+  }
 
 </script>
 <iframe name="iframe-nascosto" style="display:none"></iframe>
