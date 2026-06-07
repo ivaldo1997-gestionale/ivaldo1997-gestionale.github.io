@@ -1307,6 +1307,11 @@
       spessore_cm: r['Spessore cm'] || '',
       stima_min: r['Stima Min'] || '',
       stima_max: r['Stima Max'] || '',
+      placcatura_stima: r['Placcatura Stima'] || '',
+      placcatura_mq: r['Placcatura Mq'] || '',
+      placcatura_materiale: r['Placcatura Materiale'] || '',
+      vmc_stima: r['VMC Stima'] || '',
+      vmc_apparecchi: r['VMC Apparecchi'] || '',
     };
   }
 
@@ -1515,6 +1520,8 @@
     chiudiModuliAggiuntivi();
     // Suggerimento moduli in base al problema segnalato (solo segnalazione, decide Monica)
     aggiornaSuggerimentoModuli();
+    // Ripresenta nel pannello stima eventuali valori placcatura/VMC già salvati in precedenza
+    precaricaModuliSalvati();
     stPannelloCorrente = 1;
     // Pre-compila pannello 1 con i dati già nel lead
     const pianoLead = parseInt(leadCorrente.piano) || 0;
@@ -1993,6 +2000,58 @@
     window._vmcStima = null;
   }
 
+  // ── Precarica nel pannello stima eventuali valori placcatura/VMC già salvati ──
+  // "per riaverli disponibili sempre": mostra i valori archiviati sul foglio,
+  // separati dall'insufflaggio, senza dover ricalcolare da capo riaprendo il lead.
+  function precaricaModuliSalvati() {
+    if (!leadCorrente) return;
+
+    if (leadCorrente.placcatura_stima) {
+      const totale = parseFloat(leadCorrente.placcatura_stima) || 0;
+      const mq = parseFloat(leadCorrente.placcatura_mq) || 0;
+      const materiale = leadCorrente.placcatura_materiale || 'poratec';
+      window._plStima = { totale, mq, materiale };
+
+      const nomi = { poratec: 'Poratec 5 cm', biomat: 'Biomat 2,5 cm', sanus: 'Sanus 1,3 cm' };
+      const sel = document.getElementById('plac-materiale');
+      if (sel) sel.value = materiale;
+      const out = document.getElementById('plac-output');
+      if (out) {
+        out.style.display = 'block';
+        out.innerHTML =
+          '<div class="st-stima-range"><span class="st-range-min">€ ' + totale.toLocaleString('it-IT') + '</span></div>' +
+          '<div class="st-tags"><span class="st-tag">📋 Valore salvato in precedenza</span>' +
+          (mq ? '<span class="st-tag">' + mq.toFixed(1) + ' mq</span>' : '') +
+          '<span class="st-tag">' + (nomi[materiale] || materiale) + '</span></div>' +
+          '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se la geometria è cambiata</div>';
+      }
+      const wrap = document.getElementById('plac-wrapper');
+      if (wrap) wrap.classList.add('aperto');
+    }
+
+    if (leadCorrente.vmc_stima) {
+      const totale = parseFloat(leadCorrente.vmc_stima) || 0;
+      const apparecchi = parseInt(leadCorrente.vmc_apparecchi) || 0;
+      window._vmcStima = { totale, apparecchi };
+
+      const inp = document.getElementById('vmc-apparecchi');
+      if (inp && apparecchi) inp.value = apparecchi;
+      const out = document.getElementById('vmc-output');
+      if (out) {
+        out.style.display = 'block';
+        out.innerHTML =
+          '<div class="st-stima-range"><span class="st-range-min">€ ' + totale.toLocaleString('it-IT') + '</span></div>' +
+          '<div class="st-tags"><span class="st-tag">📋 Valore salvato in precedenza</span>' +
+          '<span class="st-tag">' + apparecchi + (apparecchi === 1 ? ' apparecchio' : ' apparecchi') + '</span></div>' +
+          '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se il numero di apparecchi è cambiato</div>';
+      }
+      const wrap = document.getElementById('vmc-wrapper');
+      if (wrap) wrap.classList.add('aperto');
+    }
+
+    aggiornaProspetto();
+  }
+
   function calcolaStima() {
     // ---- dati pannelli ----
     const piano     = parseInt(document.getElementById('st-piano').value)   || 0;
@@ -2108,6 +2167,16 @@
       stima_min:     out.dataset.min,
       stima_max:     out.dataset.max
     };
+    // Moduli paralleli — valori salvati separati dall'insufflaggio
+    if (window._plStima) {
+      dati.placcatura_stima = window._plStima.totale;
+      dati.placcatura_mq = window._plStima.mq;
+      dati.placcatura_materiale = window._plStima.materiale;
+    }
+    if (window._vmcStima) {
+      dati.vmc_stima = window._vmcStima.totale;
+      dati.vmc_apparecchi = window._vmcStima.apparecchi;
+    }
     inviaAggiornamento(dati).then(() => {
       const btn = document.querySelector('.btn-salva-stima');
       if (btn) {
