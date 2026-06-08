@@ -2302,6 +2302,35 @@
       dati.vmc_apparecchi = window._vmcStima.apparecchi;
     }
     inviaAggiornamento(dati).then(() => {
+      // Aggiorna subito la copia locale (leadCorrente, che è lo stesso oggetto referenziato
+      // dentro tuttiLead) così, riaprendo la scheda nella stessa sessione, i dati restano
+      // visibili anche prima che la pipeline venga ricaricata dal foglio
+      leadCorrente.anno             = datiGen.anno_edificio;
+      leadCorrente.piano            = datiGen.piano;
+      leadCorrente.stanze           = datiGen.stanze_coinvolte;
+      leadCorrente.tipo_immobile    = datiGen.tipo_immobile;
+      leadCorrente.pareti           = datiGen.pareti_doppie;
+      leadCorrente.piani_totali     = datiGen.piani_totali;
+      leadCorrente.altezza_soffitto = datiGen.altezza_soffitto;
+      leadCorrente.edificio_abitato = datiGen.edificio_abitato;
+      leadCorrente.accesso_furgone  = datiGen.accesso_furgone;
+      leadCorrente.note_operative   = datiGen.note_operative;
+      if (haInsufflaggio) {
+        leadCorrente.superficie_mq = dati.superficie_mq;
+        leadCorrente.spessore_cm   = dati.spessore_cm;
+        leadCorrente.stima_min     = dati.stima_min;
+        leadCorrente.stima_max     = dati.stima_max;
+      }
+      if (haPlaccatura) {
+        leadCorrente.placcatura_stima     = dati.placcatura_stima;
+        leadCorrente.placcatura_mq        = dati.placcatura_mq;
+        leadCorrente.placcatura_materiale = dati.placcatura_materiale;
+      }
+      if (haVmc) {
+        leadCorrente.vmc_stima      = dati.vmc_stima;
+        leadCorrente.vmc_apparecchi = dati.vmc_apparecchi;
+      }
+
       const btn = document.getElementById('btn-salva-stima-globale');
       if (btn) {
         btn.textContent = '✅ Salvata';
