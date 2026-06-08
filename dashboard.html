@@ -821,8 +821,11 @@
     /* ---- Moduli aggiuntivi (mini-schede parallele: placcatura, VMC) ---- */
     .btn-scheda.modulo-extra {
       background: #fff4e8; border: 1.5px solid #f0c98a; color: #9a5a00;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; text-align: left;
     }
     .btn-scheda.modulo-extra:hover { background: #ffe9d0; }
+    .btn-scheda.modulo-extra .modulo-valore { margin-left: 0; flex-shrink: 0; }
     .mini-scheda { margin-top: 8px; }
     .prospetto-riga {
       display: flex; justify-content: space-between; align-items: center;
@@ -2090,8 +2093,7 @@
           '<span class="st-tag">' + (nomi[materiale] || materiale) + '</span></div>' +
           '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se la geometria è cambiata</div>';
       }
-      const wrap = document.getElementById('plac-wrapper');
-      if (wrap) { chiudiAltriPannelli('plac-wrapper'); wrap.classList.add('aperto'); }
+      // Il pannello resta chiuso: si vede solo il pulsante con il valore già calcolato accanto
     }
 
     if (leadCorrente.vmc_stima) {
@@ -2111,8 +2113,7 @@
           '<span class="st-tag">' + apparecchi + (apparecchi === 1 ? ' apparecchio' : ' apparecchi') + '</span></div>' +
           '<div class="st-disclaimer">Valore archiviato sul foglio lead — ricalcola se il numero di apparecchi è cambiato</div>';
       }
-      const wrap = document.getElementById('vmc-wrapper');
-      if (wrap) { chiudiAltriPannelli('vmc-wrapper'); wrap.classList.add('aperto'); }
+      // Il pannello resta chiuso: si vede solo il pulsante con il valore già calcolato accanto
     }
 
     // ── Insufflaggio — stesso trattamento: valore salvato sempre visibile, scheda per scheda ──
@@ -2141,8 +2142,7 @@
         if (mq) out.dataset.mq = mq;
         if (cm) out.dataset.cm = cm;
       }
-      const wrapIns = document.getElementById('ins-wrapper');
-      if (wrapIns) { chiudiAltriPannelli('ins-wrapper'); wrapIns.classList.add('aperto'); }
+      // Il pannello resta chiuso: si vede solo il pulsante con il valore già calcolato accanto
     }
 
     aggiornaProspetto();
